@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WAP_Project", "WAP_Project\WAP_Project.csproj", "{28144A53-F2BB-43B0-A08D-4DDFFEF7B08B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{28144A53-F2BB-43B0-A08D-4DDFFEF7B08B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28144A53-F2BB-43B0-A08D-4DDFFEF7B08B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28144A53-F2BB-43B0-A08D-4DDFFEF7B08B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28144A53-F2BB-43B0-A08D-4DDFFEF7B08B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {66AA4C44-7A03-4128-8AC0-DFBE128F1F88}
+	EndGlobalSection
+EndGlobal

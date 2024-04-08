@@ -1,0 +1,6 @@
+@WAP_Project_HostAddress = http://localhost:5109
+
+GET {{WAP_Project_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
