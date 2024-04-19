@@ -45,7 +45,7 @@ namespace WAP_Project.Controllers
 
             _users.Add(newUser);
 
-            return Ok("User registered successfully");
+            return Ok("User registered successfully!");
         }
 
         // Login endpoint
