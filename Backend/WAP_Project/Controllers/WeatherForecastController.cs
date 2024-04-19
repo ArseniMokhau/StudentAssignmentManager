@@ -57,7 +57,7 @@ namespace WAP_Project.Controllers
 
             if (user == null)
             {
-                return BadRequest("Invalid username or password");
+                return BadRequest("Invalid username or password!");
             }
 
             // Create JWT token
