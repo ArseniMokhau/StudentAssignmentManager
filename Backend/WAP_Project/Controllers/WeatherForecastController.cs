@@ -7,6 +7,8 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.EntityFrameworkCore;
+using WAP_Project.Models;
 
 namespace WAP_Project.Controllers
 {
@@ -15,21 +17,24 @@ namespace WAP_Project.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ILogger<AuthController> _logger;
+        private readonly DataContext _context;
 
-        public AuthController(ILogger<AuthController> logger)
+        public AuthController(ILogger<AuthController> logger, DataContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         // Mock database for storing users
         private static readonly List<User> _users = new List<User>();
+        private static readonly List<Student> _usersStudent = new List<Student>();
 
         // Register endpoint
         [HttpPost("register")]
         public IActionResult Register([FromBody] UserRegisterModel model)
         {
             // Check if username already exists
-            if (_users.Any(u => u.Username == model.Username))
+            if (_context.Users.Any(u => u.Username == model.Username))
             {
                 return BadRequest("Username already exists");
             }
@@ -42,8 +47,37 @@ namespace WAP_Project.Controllers
                 Password = model.Password,
                 Role = model.Role
             };
+            _context.Users.Add(newUser);
+            _context.SaveChanges();
 
-            _users.Add(newUser);
+            //// Check if username already exists
+            //if (_usersStudent.Any(u => u.Username == model.Username))
+            //{
+            //    return BadRequest("Username already exists");
+            //}
+            //if (model.Role == "Student")
+            //{
+            //    var newStudent = new Student
+            //    {
+            //        StudentId = Guid.NewGuid().ToString(),
+            //        Username = model.Username,
+            //        PasswordHash = model.Password
+            //    };
+
+
+            //}
+            ////else if (model.Role == "Teacher")
+            ////{
+            ////    var newTeacher = new Teacher
+            ////    {
+            ////        Id = Guid.NewGuid().ToString(),
+            ////        Username = model.Username,
+            ////        Password = model.Password
+            ////    };
+
+            ////    _context.Teachers.Add(newTeacher);
+            ////}
+
 
             return Ok("User registered successfully");
         }
@@ -65,6 +99,7 @@ namespace WAP_Project.Controllers
 
             return Ok(new { Token = token });
         }
+        //свхсвхсвхсхвхсвхсхвсхвсхвсхвхссхв
 
         // Helper method to generate JWT token
         private string GenerateJwtToken(User user)
@@ -110,11 +145,20 @@ namespace WAP_Project.Controllers
     }
 
     // Mock user model (in a real-world scenario, use a proper user model with data annotations)
-    public class User
-    {
-        public string Id { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
-        public string Role { get; set; }
-    }
+    //public class User
+    //{
+    //    public string Id { get; set; }
+    //    public string Username { get; set; }
+    //    public string Password { get; set; }
+    //    public string Role { get; set; }
+    //}
+
+    //public class Student
+    //{
+    //    public string StudentId { get; set; }
+    ////    public string Username { get; set; }
+    //    public string PasswordHash { get; set; }
+    //    public string Role { get; set; }
+    //    public string Token { get; set; } // Опционально: может быть обновлено после регистрации/входа
+    //}
 }
