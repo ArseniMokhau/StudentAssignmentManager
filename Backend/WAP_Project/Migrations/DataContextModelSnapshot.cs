@@ -44,9 +44,9 @@ namespace WAP_Project.Migrations
 
             modelBuilder.Entity("WAP_Project.Models.Teacher", b =>
                 {
-                    b.Property<int>("TeacherId")
+                    b.Property<string>("TeacherId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()

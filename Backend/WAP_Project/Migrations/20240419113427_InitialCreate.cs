@@ -29,7 +29,7 @@ namespace WAP_Project.Migrations
                 name: "Teachers",
                 columns: table => new
                 {
-                    TeacherId = table.Column<int>(type: "INTEGER", nullable: false)
+                    TeacherId = table.Column<string>(type: "string", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Username = table.Column<string>(type: "TEXT", nullable: false),
                     PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
