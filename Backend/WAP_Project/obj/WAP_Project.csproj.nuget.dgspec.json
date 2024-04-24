@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "D:\\ASP projects\\WAP_Project\\WAP_Project\\WAP_Project.csproj": {}
+    "D:\\University\\webowe\\updateRegistr\\Backend\\WAP_Project\\WAP_Project.csproj": {}
   },
   "projects": {
-    "D:\\ASP projects\\WAP_Project\\WAP_Project\\WAP_Project.csproj": {
+    "D:\\University\\webowe\\updateRegistr\\Backend\\WAP_Project\\WAP_Project.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\ASP projects\\WAP_Project\\WAP_Project\\WAP_Project.csproj",
+        "projectUniqueName": "D:\\University\\webowe\\updateRegistr\\Backend\\WAP_Project\\WAP_Project.csproj",
         "projectName": "WAP_Project",
-        "projectPath": "D:\\ASP projects\\WAP_Project\\WAP_Project\\WAP_Project.csproj",
-        "packagesPath": "C:\\Users\\ottad\\.nuget\\packages\\",
-        "outputPath": "D:\\ASP projects\\WAP_Project\\WAP_Project\\obj\\",
+        "projectPath": "D:\\University\\webowe\\updateRegistr\\Backend\\WAP_Project\\WAP_Project.csproj",
+        "packagesPath": "C:\\Users\\Катерина\\.nuget\\packages\\",
+        "outputPath": "D:\\University\\webowe\\updateRegistr\\Backend\\WAP_Project\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "D:\\Visual Studio 2022\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\ottad\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Катерина\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -40,6 +45,16 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.4, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[8.0.4, )"
+            },
             "Microsoft.IdentityModel.Tokens": {
               "target": "Package",
               "version": "[7.4.0, )"
@@ -72,7 +87,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
