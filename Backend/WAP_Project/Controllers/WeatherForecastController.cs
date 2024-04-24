@@ -28,59 +28,108 @@ namespace WAP_Project.Controllers
         // Mock database for storing users
         private static readonly List<User> _users = new List<User>();
         private static readonly List<Student> _usersStudent = new List<Student>();
+        private static readonly List<Teacher> _usersTeacher = new List<Teacher>();
 
         // Register endpoint
         [HttpPost("register")]
         public IActionResult Register([FromBody] UserRegisterModel model)
         {
-            // Check if username already exists
-            if (_context.Users.Any(u => u.Username == model.Username))
-            {
-                return BadRequest("Username already exists");
-            }
-
-            // We should hash the password before storing it
-            var newUser = new User
-            {
-                Id = Guid.NewGuid().ToString(),
-                Username = model.Username,
-                Password = model.Password,
-                Role = model.Role
-            };
-            _context.Users.Add(newUser);
-            _context.SaveChanges();
-
             //// Check if username already exists
-            //if (_usersStudent.Any(u => u.Username == model.Username))
+            //if (_context.Users.Any(u => u.Username == model.Username))
             //{
             //    return BadRequest("Username already exists");
             //}
-            //if (model.Role == "Student")
+
+            //// We should hash the password before storing it
+            //var newUser = new User
             //{
-            //    var newStudent = new Student
-            //    {
-            //        StudentId = Guid.NewGuid().ToString(),
-            //        Username = model.Username,
-            //        PasswordHash = model.Password
-            //    };
+            //    Id = Guid.NewGuid().ToString(),
+            //    Username = model.Username,
+            //    Password = model.Password,
+            //    Role = model.Role
+            //};
+            //_context.Users.Add(newUser);
+            //_context.SaveChanges();
 
 
-            //}
-            ////else if (model.Role == "Teacher")
-            ////{
-            ////    var newTeacher = new Teacher
-            ////    {
-            ////        Id = Guid.NewGuid().ToString(),
-            ////        Username = model.Username,
-            ////        Password = model.Password
-            ////    };
+            // Check if username already exists
+            if (_context.Students.Any(u => u.Username == model.Username) || _context.Teachers.Any(u => u.Username == model.Username))
+            {
+                return BadRequest("Username already exists");
+            }
+            // проверка для студ и преп отдельная бо если в студ есть такое имя то а преп уже не добавить
+            if (model.Role == "Student")
+            {
+                var newStudent = new Student
+                {
+                    StudentId = Guid.NewGuid().ToString(),
+                    Username = model.Username,
+                    PasswordHash = model.Password,
+                    Role = model.Role,
+                    Token = "" // значение по умолчанию 
 
-            ////    _context.Teachers.Add(newTeacher);
-            ////}
+                };
 
+                _context.Students.Add(newStudent);
+            }
+            else if (model.Role == "Teacher")
+            {
+                var newTeacher = new Teacher
+                {
+                    TeacherId = Guid.NewGuid().ToString(),
+                    Username = model.Username,
+                    PasswordHash = model.Password,
+                    Role = model.Role,
+                    Token = "" // значение по умолчанию
+                };
+
+                _context.Teachers.Add(newTeacher);
+            }
+            else
+            {
+                return BadRequest("Invalid role");
+            }
+
+            _context.SaveChanges();
 
             return Ok("User registered successfully");
         }
+
+        //    // Check if username already exists
+        //    if (_context.Students.Any(u => u.Username == model.Username) || _context.Teachers.Any(u => u.Username == model.Username))
+        //    {
+        //        return BadRequest("Username already exists");
+        //    }
+
+        //    if (model.Role == "Student" || model.Role == "student")
+        //    {
+        //        var newStudent = new Student
+        //        {
+        //            StudentId = Guid.NewGuid().ToString(),
+        //            Username = model.Username,
+        //            PasswordHash = model.Password,
+        //            Role = model.Role
+        //        };
+
+        //        _context.Students.Add(newStudent);
+        //        _context.SaveChanges();
+        //    }
+        //    else if (model.Role == "Teacher")
+        //    {
+        //        var newTeacher = new Teacher
+        //        {
+        //            TeacherId = Guid.NewGuid().ToString(),
+        //            Username = model.Username,
+        //            PasswordHash = model.Password,
+        //            Role = model.Role
+        //        };
+
+        //        _context.Teachers.Add(newTeacher);
+        //        _context.SaveChanges();
+        //    }
+
+        //    return Ok("User registered successfully");
+        //}
 
         // Login endpoint
         [HttpPost("login")]
@@ -99,7 +148,6 @@ namespace WAP_Project.Controllers
 
             return Ok(new { Token = token });
         }
-        //свхсвхсвхсхвхсвхсхвсхвсхвсхвхссхв
 
         // Helper method to generate JWT token
         private string GenerateJwtToken(User user)
