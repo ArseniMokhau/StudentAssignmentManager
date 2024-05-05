@@ -33,10 +33,6 @@ namespace WAP_Project.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.HasKey("StudentId");
 
                     b.ToTable("Students");
