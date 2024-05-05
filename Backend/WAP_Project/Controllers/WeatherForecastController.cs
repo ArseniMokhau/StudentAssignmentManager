@@ -9,6 +9,7 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.EntityFrameworkCore;
 using WAP_Project.Models;
+using System.Text.RegularExpressions;
 
 namespace WAP_Project.Controllers
 {
@@ -29,11 +30,13 @@ namespace WAP_Project.Controllers
         private static readonly List<User> _users = new List<User>();
         private static readonly List<Student> _usersStudent = new List<Student>();
         private static readonly List<Teacher> _usersTeacher = new List<Teacher>();
+        private static readonly List<UserToken> _usersTokens = new List<UserToken>();
 
         // Register endpoint
         [HttpPost("register")]
         public IActionResult Register([FromBody] UserRegisterModel model)
         {
+
             //// Check if username already exists
             //if (_context.Users.Any(u => u.Username == model.Username))
             //{
@@ -51,9 +54,11 @@ namespace WAP_Project.Controllers
             //_context.Users.Add(newUser);
             //_context.SaveChanges();
 
+            if (!IfValidateUsername(model.Username)) return BadRequest("Invalid username format");
 
-            // Check if username already exists
-            if (_context.Students.Any(u => u.Username == model.Username) || _context.Teachers.Any(u => u.Username == model.Username))
+                // Check if username already exists
+                if (_context.Students.Any(u => u.Username == model.Username && u.Role == model.Role) || 
+                    _context.Teachers.Any(u => u.Username == model.Username && u.Role == model.Role))
             {
                 return BadRequest("Username already exists");
             }
@@ -65,8 +70,8 @@ namespace WAP_Project.Controllers
                     StudentId = Guid.NewGuid().ToString(),
                     Username = model.Username,
                     PasswordHash = model.Password,
-                    Role = model.Role,
-                    Token = "" // значение по умолчанию 
+                    Role = model.Role
+                    //Token = "" // значение по умолчанию 
 
                 };
 
@@ -79,8 +84,8 @@ namespace WAP_Project.Controllers
                     TeacherId = Guid.NewGuid().ToString(),
                     Username = model.Username,
                     PasswordHash = model.Password,
-                    Role = model.Role,
-                    Token = "" // значение по умолчанию
+                    Role = model.Role
+                    //Token = "" // значение по умолчанию
                 };
 
                 _context.Teachers.Add(newTeacher);
@@ -95,62 +100,89 @@ namespace WAP_Project.Controllers
             return Ok("User registered successfully");
         }
 
-        //    // Check if username already exists
-        //    if (_context.Students.Any(u => u.Username == model.Username) || _context.Teachers.Any(u => u.Username == model.Username))
-        //    {
-        //        return BadRequest("Username already exists");
-        //    }
-
-        //    if (model.Role == "Student" || model.Role == "student")
-        //    {
-        //        var newStudent = new Student
-        //        {
-        //            StudentId = Guid.NewGuid().ToString(),
-        //            Username = model.Username,
-        //            PasswordHash = model.Password,
-        //            Role = model.Role
-        //        };
-
-        //        _context.Students.Add(newStudent);
-        //        _context.SaveChanges();
-        //    }
-        //    else if (model.Role == "Teacher")
-        //    {
-        //        var newTeacher = new Teacher
-        //        {
-        //            TeacherId = Guid.NewGuid().ToString(),
-        //            Username = model.Username,
-        //            PasswordHash = model.Password,
-        //            Role = model.Role
-        //        };
-
-        //        _context.Teachers.Add(newTeacher);
-        //        _context.SaveChanges();
-        //    }
-
-        //    return Ok("User registered successfully");
-        //}
-
+        private bool IfValidateUsername(string username)
+        {
+            // только буквы, и длина имени должна быть от 3 до 20 символов.
+            string pattern = @"^[a-zA-Z]{3,20}$";
+            return Regex.IsMatch(username, pattern);
+        }
+       
         // Login endpoint
         [HttpPost("login")]
+        //проверка базы 
         public IActionResult Login([FromBody] UserLoginModel model)
         {
-            // Check if user exists
-            var user = _users.SingleOrDefault(u => u.Username == model.Username && u.Password == model.Password);
+            //// Check if user exists
+            //var user = _users.SingleOrDefault(u => u.Username == model.Username && u.Password == model.Password);
+            //if (user == null)
+            //{
+            //    return BadRequest("Invalid username or password");
+            //}
 
-            if (user == null)
+            //try
+            //{
+            //    var student = _usersStudent.FirstOrDefault(u => u.Username == model.Username && u.PasswordHash == model.Password);
+            //    var teacher = _usersTeacher.FirstOrDefault(u => u.Username.Equals(model.Username) && u.PasswordHash.Equals(model.Password));
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine($"Error: {ex.Message}");
+            //    return BadRequest("An error occurred while processing your request.");
+            //}
+
+
+            Console.WriteLine($"Username: {model.Username}, PasswordHash: {model.PasswordHash}");
+            Console.WriteLine($"Searching for student: Username = {model.Username}, PasswordHash = {model.PasswordHash}");
+            //если Username одинаковые в ученике и учителе?
+            var student = _context.Students
+                .FirstOrDefault(u => u.Username == model.Username && u.PasswordHash == model.PasswordHash);
+            if (student != null) return GenerateAndReturnToken(student.StudentId, student.PasswordHash);
+
+            Console.WriteLine($"Searching for teacher: Username = {model.Username}, PasswordHash = {model.PasswordHash}");
+           
+            var teacher = _context.Teachers
+                .FirstOrDefault(u => u.Username == model.Username && u.PasswordHash == model.PasswordHash); 
+            if (teacher != null) return GenerateAndReturnToken(teacher.TeacherId, teacher.PasswordHash);
+           
+            //_context.SaveChanges();
+            return BadRequest("Invalid username or password");
+           
+            
+            //// Create JWT token
+            //var token = GenerateJwtToken(user);
+            //return Ok(new { Token = token });
+        }
+
+        private IActionResult GenerateAndReturnToken(string username, string role)
+        {
+            // Check if token already exists for this user
+            var existingToken = _context.UserTokens.FirstOrDefault(t => t.UserId == username);
+            if (existingToken != null)
             {
-                return BadRequest("Invalid username or password");
+                // Token already exists, return it
+                return Ok(new { Token = existingToken.Token });
             }
 
             // Create JWT token
-            var token = GenerateJwtToken(user);
-
+            var token = GenerateJwtToken(username, role);
+            AddTokenToDatabase(username, token);
             return Ok(new { Token = token });
         }
 
+        //не возврашает токен   _context.SaveChanges(); ОШИБКА
+        private void AddTokenToDatabase(string userId, string token)
+        {
+            var newToken = new UserToken
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserId = userId,
+                Token = token
+            };
+            _context.UserTokens.Add(newToken);
+            _context.SaveChanges();
+        }
         // Helper method to generate JWT token
-        private string GenerateJwtToken(User user)
+        private string GenerateJwtToken(string username, string role)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes("your-secret-key-with-at-least-128-bits"); // Ensure your key has at least 128 bits
@@ -166,8 +198,8 @@ namespace WAP_Project.Controllers
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-            new Claim(ClaimTypes.Name, user.Username),
-            new Claim(ClaimTypes.Role, user.Role)
+            new Claim(ClaimTypes.Name, username),
+            new Claim(ClaimTypes.Role, role)
         }),
                 Expires = DateTime.UtcNow.AddDays(7), // Token expires in 7 days
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -178,7 +210,10 @@ namespace WAP_Project.Controllers
         }
     }
 
-    // Models for registration and login
+    
+}
+
+// Models for registration and login
     public class UserRegisterModel
     {
         public string Username { get; set; }
@@ -189,7 +224,7 @@ namespace WAP_Project.Controllers
     public class UserLoginModel
     {
         public string Username { get; set; }
-        public string Password { get; set; }
+        public string PasswordHash { get; set; }
     }
 
     // Mock user model (in a real-world scenario, use a proper user model with data annotations)
@@ -209,4 +244,4 @@ namespace WAP_Project.Controllers
     //    public string Role { get; set; }
     //    public string Token { get; set; } // Опционально: может быть обновлено после регистрации/входа
     //}
-}
+
