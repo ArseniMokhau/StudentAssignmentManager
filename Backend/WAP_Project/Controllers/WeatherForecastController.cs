@@ -54,6 +54,7 @@ namespace WAP_Project.Controllers
             //_context.Users.Add(newUser);
             //_context.SaveChanges();
 
+            //if we need it
             if (!IfValidateUsername(model.Username)) return BadRequest("Invalid username format");
 
                 // Check if username already exists
@@ -63,7 +64,7 @@ namespace WAP_Project.Controllers
                 return BadRequest("Username already exists");
             }
             // проверка для студ и преп отдельная бо если в студ есть такое имя то а преп уже не добавить
-            if (model.Role == "Student")
+            if (model.Role == "Student" || model.Role == "student")
             {
                 var newStudent = new Student
                 {
@@ -77,7 +78,7 @@ namespace WAP_Project.Controllers
 
                 _context.Students.Add(newStudent);
             }
-            else if (model.Role == "Teacher")
+            else if (model.Role == "Teacher" || model.Role == "teacher")
             {
                 var newTeacher = new Teacher
                 {

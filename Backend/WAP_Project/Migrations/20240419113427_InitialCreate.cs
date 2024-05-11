@@ -18,7 +18,7 @@ namespace WAP_Project.Migrations
                     Username = table.Column<string>(type: "TEXT", nullable: false),
                     PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
                     Role = table.Column<string>(type: "TEXT", nullable: false),
-                    Token = table.Column<string>(type: "TEXT", nullable: false)
+                    //Token = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -34,7 +34,7 @@ namespace WAP_Project.Migrations
                     Username = table.Column<string>(type: "TEXT", nullable: false),
                     PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
                     Role = table.Column<string>(type: "TEXT", nullable: false),
-                    Token = table.Column<string>(type: "TEXT", nullable: false)
+                    //Token = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {

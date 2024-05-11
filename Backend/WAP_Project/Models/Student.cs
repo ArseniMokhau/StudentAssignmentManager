@@ -8,6 +8,6 @@
         public string Role { get; set; }
         
         // Опционально: может быть обновлено после регистрации/входа
-        public string? Token { get; set; } // Разрешить NULL значения для поля Token
+        //public string? Token { get; set; } // Разрешить NULL значения для поля Token
     }
 }

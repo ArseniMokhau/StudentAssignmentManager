@@ -8,6 +8,9 @@ namespace WAP_Project.Migrations
     public partial class AddTokenTable : Migration
     {
         /// <inheritdoc />
+        /// 
+
+
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
