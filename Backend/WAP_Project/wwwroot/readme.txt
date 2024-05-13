@@ -1,0 +1,1 @@
+A folder that stores static web assets, such as HTML, CSS, JavaScript, images, and other client-side files. 
