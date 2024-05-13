@@ -10,6 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.EntityFrameworkCore;
 using WAP_Project.Models;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Hosting;
 
 namespace WAP_Project.Controllers
 {
@@ -19,11 +20,13 @@ namespace WAP_Project.Controllers
     {
         private readonly ILogger<AuthController> _logger;
         private readonly DataContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public AuthController(ILogger<AuthController> logger, DataContext context)
+        public AuthController(ILogger<AuthController> logger, DataContext context, IWebHostEnvironment environment)
         {
             _logger = logger;
             _context = context;
+            _environment = environment;
         }
 
         // Mock database for storing users
@@ -152,6 +155,69 @@ namespace WAP_Project.Controllers
             //// Create JWT token
             //var token = GenerateJwtToken(user);
             //return Ok(new { Token = token });
+        }
+
+        // Endpoint for uploading files
+        [HttpPost("upload")]
+        public IActionResult UploadFiles(List<IFormFile> files)
+        {
+            if (files == null || files.Count == 0)
+            {
+                return BadRequest("No files uploaded");
+            }
+
+            // Define the uploads directory relative to the web root
+            var uploadsDirectory = Path.Combine(_environment.WebRootPath, "Uploads");
+
+            // Create the directory if it doesn't exist
+            if (!Directory.Exists(uploadsDirectory))
+            {
+                Directory.CreateDirectory(uploadsDirectory);
+            }
+
+            var uploadedFileInfos = new List<string>();
+
+            // Iterate through each file and save it to the server
+            foreach (var file in files)
+            {
+                if (file.Length > 0)
+                {
+                    // Generate a unique filename
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    var filePath = Path.Combine(uploadsDirectory, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        file.CopyTo(stream);
+                    }
+
+                    uploadedFileInfos.Add(filePath);
+                }
+            }
+
+            return Ok(new { UploadedFiles = uploadedFileInfos });
+        }
+
+        // Endpoint for downloading files
+        [HttpGet("download/{fileName}")]
+        public IActionResult DownloadFile(string fileName)
+        {
+            var uploadsDirectory = Path.Combine(_environment.WebRootPath, "Uploads");
+            var filePath = Path.Combine(uploadsDirectory, fileName);
+
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound();
+            }
+
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(filePath, FileMode.Open))
+            {
+                stream.CopyTo(memory);
+            }
+            memory.Position = 0;
+
+            return File(memory, "application/octet-stream", Path.GetFileName(filePath));
         }
 
         private IActionResult GenerateAndReturnToken(string username, string role)
