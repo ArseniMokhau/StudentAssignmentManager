@@ -34,6 +34,7 @@ namespace WAP_Project.Controllers
         private static readonly List<Student> _usersStudent = new List<Student>();
         private static readonly List<Teacher> _usersTeacher = new List<Teacher>();
         private static readonly List<UserToken> _usersTokens = new List<UserToken>();
+        private static readonly List<Repository> _repository = new List<Repository>();
 
         // Register endpoint
         [HttpPost("register")]
@@ -275,40 +276,97 @@ namespace WAP_Project.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+
+
+       /* // Create course endpoint for teachers
+        [HttpPost("create-course")]
+        public IActionResult CreateCourse([FromBody] Repository repository, TeacherRepository tRepository)
+        {
+            // Validate model
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Check if teacher exists
+            var teacher = _context.Teachers.FirstOrDefault(t => t.TeacherId == tRepository.TeacherId);
+            if (teacher == null)
+            {
+                return BadRequest("Teacher not found");
+            }
+
+            // Create new course
+            var newCourse = new Repository
+            {
+                RepositoryId = Guid.NewGuid().ToString(),
+                RepositoryName = repository.RepositoryName
+            };
+
+            _context.Repositories.Add(newCourse);
+
+            // Create entry in TeacherRepository
+            var teacherRepository = new TeacherRepository
+            {
+                TeacherRepositoryId = newCourse.RepositoryId,
+                TeacherId = teacher.TeacherId
+            };
+
+            _context.TeacherRepositories.Add(teacherRepository);
+            _context.SaveChanges();
+
+            return Ok("Course created successfully");
+        }
+
+        // Add student to course endpoint for teachers
+        [HttpPost("add-student-to-course")]
+        public IActionResult AddStudentToCourse([FromBody] StudentRepository model)
+        {
+            // Validate model
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Check if course exists
+            var course = _context.Repositories.FirstOrDefault(c => c.RepositoryId == model.StudentRepositoryId);
+            if (course == null)
+            {
+                return BadRequest("Course not found");
+            }
+
+            // Check if student exists
+            var student = _context.Students.FirstOrDefault(s => s.StudentId == model.StudentId);
+            if (student == null)
+            {
+                return BadRequest("Student not found");
+            }
+
+            // Check if student is already added to the course
+            var existingEntry = _context.StudentRepositories.FirstOrDefault(sc => sc.StudentRepositoryId == model.StudentRepositoryId && sc.StudentId == model.StudentId);
+            if (existingEntry != null)
+            {
+                return BadRequest("Student already added to the course");
+            }
+
+            // Add student to course
+            var studentCourse = new StudentRepository
+            {
+                StudentRepositoryId = model.StudentRepositoryId,
+                StudentId = model.StudentId,
+               // IsAccepted = false // Example: student needs approval from teacher
+            };
+
+            _context.StudentRepositories.Add(studentCourse);
+            _context.SaveChanges();
+
+            return Ok("Student added to course successfully");
+        }*/
+
     }
 
-    
+
+
+
+
 }
-
-// Models for registration and login
-    public class UserRegisterModel
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
-        public string Role { get; set; }
-    }
-
-    public class UserLoginModel
-    {
-        public string Username { get; set; }
-        public string PasswordHash { get; set; }
-    }
-
-    // Mock user model (in a real-world scenario, use a proper user model with data annotations)
-    //public class User
-    //{
-    //    public string Id { get; set; }
-    //    public string Username { get; set; }
-    //    public string Password { get; set; }
-    //    public string Role { get; set; }
-    //}
-
-    //public class Student
-    //{
-    //    public string StudentId { get; set; }
-    ////    public string Username { get; set; }
-    //    public string PasswordHash { get; set; }
-    //    public string Role { get; set; }
-    //    public string Token { get; set; } // Опционально: может быть обновлено после регистрации/входа
-    //}
 

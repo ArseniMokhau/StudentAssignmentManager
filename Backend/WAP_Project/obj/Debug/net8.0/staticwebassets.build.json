@@ -1,11 +1,39 @@
 {
   "Version": 1,
-  "Hash": "WYm+TAdlSqVqys4QBjz7CqXq654nF9WBNNxIrkClBdQ=",
+  "Hash": "2ZGJnITAAHPkKVHz/guAWkJWle5hvfHHG7zfGudac8o=",
   "Source": "WAP_Project",
   "BasePath": "_content/WAP_Project",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "WAP_Project\\wwwroot",
+      "Source": "WAP_Project",
+      "ContentRoot": "D:\\University\\webowe\\StudentAssignmentManager\\Backend\\WAP_Project\\wwwroot\\",
+      "BasePath": "_content/WAP_Project",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "D:\\University\\webowe\\StudentAssignmentManager\\Backend\\WAP_Project\\wwwroot\\readme.txt",
+      "SourceId": "WAP_Project",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\University\\webowe\\StudentAssignmentManager\\Backend\\WAP_Project\\wwwroot\\",
+      "BasePath": "_content/WAP_Project",
+      "RelativePath": "readme.txt",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\readme.txt"
+    }
+  ]
 }
