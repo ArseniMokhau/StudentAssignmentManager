@@ -1,8 +1,24 @@
-﻿################################################################################
-# Данный GITIGNORE-файл был автоматически создан Microsoft(R) Visual Studio.
-################################################################################
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-/Backend/.vs/WAP_Project/FileContentIndex/233ecc7c-9973-4aff-87bf-30e1c15096c7.vsidx
-/Backend/.vs/WAP_Project/FileContentIndex/3697a2ff-f916-40a2-a833-5041bd2c68cb.vsidx
-/Backend/.vs/WAP_Project/FileContentIndex/4196b234-f537-4d7c-816a-d4f1a069d670.vsidx
-/Backend/.vs/WAP_Project/FileContentIndex
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
