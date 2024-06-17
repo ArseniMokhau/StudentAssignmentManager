@@ -1,0 +1,25 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\University\\webowe\\registerLast.26.05\\Backend\\WAP_Project\\wwwroot\\readme.txt",
+      "PackagePath": "staticwebassets\\readme.txt"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.WAP_Project.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.WAP_Project.props",
+      "PackagePath": "build\\WAP_Project.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.WAP_Project.props",
+      "PackagePath": "buildMultiTargeting\\WAP_Project.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.WAP_Project.props",
+      "PackagePath": "buildTransitive\\WAP_Project.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

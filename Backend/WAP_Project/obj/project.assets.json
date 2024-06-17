@@ -3152,11 +3152,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\University\\webowe\\updateRegistr\\Backend\\WAP_Project\\WAP_Project.csproj",
+      "projectUniqueName": "D:\\University\\webowe\\registerLast.26.05\\Backend\\WAP_Project\\WAP_Project.csproj",
       "projectName": "WAP_Project",
-      "projectPath": "D:\\University\\webowe\\updateRegistr\\Backend\\WAP_Project\\WAP_Project.csproj",
+      "projectPath": "D:\\University\\webowe\\registerLast.26.05\\Backend\\WAP_Project\\WAP_Project.csproj",
       "packagesPath": "C:\\Users\\Катерина\\.nuget\\packages\\",
-      "outputPath": "D:\\University\\webowe\\updateRegistr\\Backend\\WAP_Project\\obj\\",
+      "outputPath": "D:\\University\\webowe\\registerLast.26.05\\Backend\\WAP_Project\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "D:\\Visual Studio 2022\\Shared\\NuGetPackages"

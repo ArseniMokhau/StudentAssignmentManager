@@ -34,6 +34,7 @@ namespace WAP_Project.Controllers
         private static readonly List<Student> _usersStudent = new List<Student>();
         private static readonly List<Teacher> _usersTeacher = new List<Teacher>();
         private static readonly List<UserToken> _usersTokens = new List<UserToken>();
+        private static readonly List<Repository> _usersRepository = new List<Repository>();
 
         // Register endpoint
         [HttpPost("register")]
@@ -280,35 +281,5 @@ namespace WAP_Project.Controllers
     
 }
 
-// Models for registration and login
-    public class UserRegisterModel
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
-        public string Role { get; set; }
-    }
 
-    public class UserLoginModel
-    {
-        public string Username { get; set; }
-        public string PasswordHash { get; set; }
-    }
-
-    // Mock user model (in a real-world scenario, use a proper user model with data annotations)
-    //public class User
-    //{
-    //    public string Id { get; set; }
-    //    public string Username { get; set; }
-    //    public string Password { get; set; }
-    //    public string Role { get; set; }
-    //}
-
-    //public class Student
-    //{
-    //    public string StudentId { get; set; }
-    ////    public string Username { get; set; }
-    //    public string PasswordHash { get; set; }
-    //    public string Role { get; set; }
-    //    public string Token { get; set; } // Опционально: может быть обновлено после регистрации/входа
-    //}
 
