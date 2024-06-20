@@ -1,3 +1,17 @@
+import React from 'react';
+
+export const Registration = () => {
+  return (
+    <div>
+      <h2>Registration Page</h2>
+      {/* Form elements will go here */}
+    </div>
+  );
+};
+
+// OLD REGISTRATION
+
+/*
 import React, { useState } from 'react';
 import './RegistrationPage.css'; // Import CSS file
 
@@ -77,3 +91,4 @@ export const RegistrationPage = ({ handleRegister }) => {
     </div>
   );
 };
+*/
