@@ -7,7 +7,6 @@ namespace WAP_Project.Models
     {
         [Key] public string AssignmentId { get; set; }
 
-
         public string RepositoryId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }

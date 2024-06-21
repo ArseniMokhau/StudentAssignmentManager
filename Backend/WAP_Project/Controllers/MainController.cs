@@ -278,7 +278,7 @@ namespace WAP_Project.Controllers
         }
 
 
-       /* // Create course endpoint for teachers
+        // Create course endpoint for teachers
         [HttpPost("create-course")]
         public IActionResult CreateCourse([FromBody] Repository repository, TeacherRepository tRepository)
         {
@@ -353,14 +353,14 @@ namespace WAP_Project.Controllers
             {
                 StudentRepositoryId = model.StudentRepositoryId,
                 StudentId = model.StudentId,
-               // IsAccepted = false // Example: student needs approval from teacher
+               // IsAccepted = false // student needs approval from teacher
             };
 
             _context.StudentRepositories.Add(studentCourse);
             _context.SaveChanges();
 
             return Ok("Student added to course successfully");
-        }*/
+        }
 
     }
 
