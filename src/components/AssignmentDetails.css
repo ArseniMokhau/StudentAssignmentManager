@@ -1,0 +1,84 @@
+.assignment-details {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .assignment-details h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .assignment-details p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  
+  .assignment-status {
+    margin-bottom: 20px;
+  }
+  
+  .assignment-status h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .submission-form {
+    margin-bottom: 20px;
+  }
+  
+  .submission-form h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .submission-form form {
+    margin-bottom: 10px;
+  }
+  
+  .submission-form input[type="file"] {
+    margin-right: 10px;
+  }
+  
+  .submission-form button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .submission-form button:hover {
+    background-color: #0056b3;
+  }
+  
+  .download-section {
+    margin-top: 20px;
+  }
+  
+  .download-section h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .download-section button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .download-section button:hover {
+    background-color: #218838;
+  }
+  

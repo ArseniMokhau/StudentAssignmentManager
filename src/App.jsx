@@ -7,7 +7,7 @@ import { StudentDashboard } from './components/StudentDashboard';
 import { TeacherDashboard } from './components/TeacherDashboard';
 import { CourseList } from './components/CourseList';
 import { CourseDetails } from './components/CourseDetails';
-import { TaskDetails } from './components/TaskDetails';
+import { AssignmentDetails } from './components/AssignmentDetails';
 import { Profile } from './components/Profile';
 import { AuthContext } from './auth/AuthContext';
 import { GuestHomePage } from './components/GuestHomePage';
@@ -67,7 +67,7 @@ function App() {
           <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
           <Route path="/courses" element={<CourseList />} />
           <Route path="/course/:id" element={<CourseDetails />} />
-          <Route path="/task/:id" element={<TaskDetails />} />
+          <Route path="/assignment/:id" element={<AssignmentDetails />} />
           <Route path="/profile" element={<Profile />} />
         </Routes>
       </div>
