@@ -42,9 +42,6 @@ function App() {
             {isLoggedIn && (
               <>
                 <li>
-                  <Link to="/student-dashboard">Dashboard</Link>
-                </li>
-                <li>
                   <Link to="/profile">Profile</Link>
                 </li>
               </>

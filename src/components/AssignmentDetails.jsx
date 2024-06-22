@@ -8,26 +8,35 @@ const placeholderAssignment = {
   id: 1,
   title: 'Assignment Title',
   description: 'Assignment Description',
+  deadline: '2024-07-01',
 };
 
 // Placeholder student submissions
 const placeholderSubmissions = [
-  { id: 1, assignmentId: 1, studentId: 101, fileName: 'file1.pdf', date: '2023-06-20' },
-  { id: 2, assignmentId: 1, studentId: 102, fileName: 'file2.pdf', date: '2023-06-21' },
+  { id: 1, assignmentId: 1, studentId: 101, fileName: 'file1.pdf', date: '2024-06-20' },
+  { id: 2, assignmentId: 1, studentId: 102, fileName: 'file2.pdf', date: '2024-06-21' },
 ];
 
 export const AssignmentDetails = () => {
   const { id } = useParams();
-  const { isLoggedIn, role } = useContext(AuthContext); // Access isLoggedIn and role from context
+  const { isLoggedIn, role } = useContext(AuthContext);
   const [assignment, setAssignment] = useState(null);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [assignmentStatus, setAssignmentStatus] = useState('Not Submitted');
   const [submissions, setSubmissions] = useState([]);
+  const [isPastDeadline, setIsPastDeadline] = useState(false);
 
   useEffect(() => {
     // Placeholder fetch assignment details by id
     setAssignment(placeholderAssignment);
+
+    // Check if the current date is past the deadline
+    const currentDate = new Date();
+    const assignmentDeadline = new Date(placeholderAssignment.deadline);
+    if (currentDate > assignmentDeadline) {
+      setIsPastDeadline(true);
+    }
 
     // Placeholder fetch assignment status by id (from backend)
     if (role === 'student') {
@@ -76,6 +85,7 @@ export const AssignmentDetails = () => {
     <div className="assignment-details">
       <h2>{assignment.title}</h2>
       <p>{assignment.description}</p>
+      <p><strong>Deadline:</strong> {assignment.deadline}</p>
 
       {role === 'teacher' ? (
         <div className="submissions-table">
@@ -113,14 +123,18 @@ export const AssignmentDetails = () => {
               <p>{assignmentStatus}</p>
             </div>
 
-            <div className="submission-form">
-              <h3>Submit Your Files</h3>
-              <form onSubmit={handleSubmit}>
-                <input type="file" onChange={handleFileChange} multiple />
-                <button type="submit">Submit</button>
-              </form>
-              {submissionStatus && <p>Submission Status: {submissionStatus}</p>}
-            </div>
+            {isPastDeadline ? (
+              <p>The deadline has passed. You can no longer submit files for this assignment.</p>
+            ) : (
+              <div className="submission-form">
+                <h3>Submit Your Files</h3>
+                <form onSubmit={handleSubmit}>
+                  <input type="file" onChange={handleFileChange} multiple />
+                  <button type="submit">Submit</button>
+                </form>
+                {submissionStatus && <p>Submission Status: {submissionStatus}</p>}
+              </div>
+            )}
 
             {assignmentStatus === 'Submitted' && (
               <div className="download-section">

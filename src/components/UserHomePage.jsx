@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Course } from './Course';
+import { AuthContext } from '../auth/AuthContext';
 import './UserHomePage.css';
 
 const placeholderCourses = [
@@ -20,12 +21,21 @@ const placeholderCourses = [
 const COURSES_PER_PAGE = 5;
 
 export const UserHomePage = () => {
+  const { role } = useContext(AuthContext);
+  const [courses, setCourses] = useState(placeholderCourses);
+  const [newCourseName, setNewCourseName] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
   const startIndex = (currentPage - 1) * COURSES_PER_PAGE;
-  const currentCourses = placeholderCourses.slice(startIndex, startIndex + COURSES_PER_PAGE);
+  const currentCourses = courses.slice(startIndex, startIndex + COURSES_PER_PAGE);
+  const totalPages = Math.ceil(courses.length / COURSES_PER_PAGE);
 
-  const totalPages = Math.ceil(placeholderCourses.length / COURSES_PER_PAGE);
+  const handleCreateCourse = (e) => {
+    e.preventDefault();
+    const newCourse = { id: courses.length + 1, name: newCourseName };
+    setCourses([...courses, newCourse]);
+    setNewCourseName('');
+  };
 
   return (
     <div className="home-page">
@@ -44,6 +54,22 @@ export const UserHomePage = () => {
           Next
         </button>
       </div>
+
+      {role === 'teacher' && (
+        <div className="create-course-form">
+          <h3>Create New Course</h3>
+          <form onSubmit={handleCreateCourse}>
+            <input
+              type="text"
+              value={newCourseName}
+              onChange={(e) => setNewCourseName(e.target.value)}
+              placeholder="Course Name"
+              required
+            />
+            <button type="submit">Create Course</button>
+          </form>
+        </div>
+      )}
     </div>
   );
 };
