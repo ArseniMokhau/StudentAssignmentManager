@@ -12,9 +12,10 @@ import { Profile } from './components/Profile';
 import { AuthContext } from './auth/AuthContext';
 import { GuestHomePage } from './components/GuestHomePage';
 import { UserHomePage } from './components/UserHomePage';
+import { Requests } from './components/Requests';
 
 function App() {
-  const { isLoggedIn } = useContext(AuthContext);
+  const { isLoggedIn, logout } = useContext(AuthContext);
 
   // Example courses data
   const courses = [
@@ -30,6 +31,12 @@ function App() {
 
   const otherCourses = courses.filter(course => !userCourses.some(userCourse => userCourse.id === course.id));
 
+  const handleLogout = () => {
+    logout();
+    // Navigate to login page after logout
+    return <Navigate to="/login" />;
+  };
+
   return (
     <Router>
       <div className="App">
@@ -39,14 +46,16 @@ function App() {
             <li>
               <Link to="/">Home</Link>
             </li>
-            {isLoggedIn && (
+            {isLoggedIn ? (
               <>
                 <li>
-                  <Link to="/profile">Profile</Link>
+                  <Link to="/requests">Requests</Link>
+                </li>
+                <li>
+                  <Link to="/" onClick={handleLogout}>Logout</Link>
                 </li>
               </>
-            )}
-            {!isLoggedIn && (
+            ) : (
               <li>
                 <Link to="/login">Login</Link>
               </li>
@@ -62,6 +71,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/student-dashboard" element={<StudentDashboard />} />
           <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+          <Route path="/requests" element={<Requests />} />
           <Route path="/courses" element={<CourseList />} />
           <Route path="/course/:id" element={<CourseDetails />} />
           <Route path="/assignment/:id" element={<AssignmentDetails />} />
