@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link, Navigate } from 'react-router-dom';
 import './AssignmentDetails.css';
 import { AuthContext } from '../auth/AuthContext';
 
@@ -19,13 +19,22 @@ const placeholderSubmissions = [
 
 export const AssignmentDetails = () => {
   const { id } = useParams();
-  const { isLoggedIn, role } = useContext(AuthContext);
+  const { role } = useContext(AuthContext);
   const [assignment, setAssignment] = useState(null);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [assignmentStatus, setAssignmentStatus] = useState('Not Submitted');
   const [submissions, setSubmissions] = useState([]);
   const [isPastDeadline, setIsPastDeadline] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isCurating, setIsCurating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // Flag for editing mode
+  const [deletionSuccess, setDeletionSuccess] = useState(false);
+  const [editedAssignment, setEditedAssignment] = useState({
+    title: '',
+    description: '',
+    deadline: '',
+  });
 
   useEffect(() => {
     // Placeholder fetch assignment details by id
@@ -38,16 +47,27 @@ export const AssignmentDetails = () => {
       setIsPastDeadline(true);
     }
 
-    // Placeholder fetch assignment status by id (from backend)
+    // Check enrollment or curation status
     if (role === 'student') {
+      checkEnrollment();
       fetchAssignmentStatusFromBackend(id);
     }
 
     if (role === 'teacher') {
-      // Placeholder fetch student submissions (from backend)
+      checkCuration();
       fetchSubmissionsFromBackend(id);
     }
   }, [id, role]);
+
+  const checkEnrollment = () => {
+    // Placeholder function to simulate checking enrollment
+    setIsEnrolled(true);
+  };
+
+  const checkCuration = () => {
+    // Placeholder function to simulate checking curation
+    setIsCurating(true);
+  };
 
   const fetchAssignmentStatusFromBackend = (assignmentId) => {
     setTimeout(() => {
@@ -77,6 +97,51 @@ export const AssignmentDetails = () => {
     console.log(`Downloading file: ${fileName}`);
   };
 
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditedAssignment({
+      title: assignment.title,
+      description: assignment.description,
+      deadline: assignment.deadline,
+    });
+  };
+
+  const handleSaveEdit = () => {
+    // Simulate sending edit request to server
+    setAssignment({
+      ...assignment,
+      title: editedAssignment.title,
+      description: editedAssignment.description,
+      deadline: editedAssignment.deadline,
+    });
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleDeleteAssignment = () => {
+    setIsEditing(false);
+    // Simulate deletion process
+    setTimeout(() => {
+      // Assuming deletion was successful
+      navigate(-1); // Navigate back to previous page in history stack
+    }, 1000);
+  };
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setEditedAssignment({
+      ...editedAssignment,
+      [name]: value,
+    });
+  };
+
+  if (deletionSuccess) {
+    return <Navigate to="/" replace />;
+  }
+
   if (!assignment) {
     return <div>Loading...</div>;
   }
@@ -87,36 +152,86 @@ export const AssignmentDetails = () => {
       <p>{assignment.description}</p>
       <p><strong>Deadline:</strong> {assignment.deadline}</p>
 
-      {role === 'teacher' ? (
-        <div className="submissions-table">
-          <h3>Student Submissions</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Student ID</th>
-                <th>File Name</th>
-                <th>Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {submissions.map((submission) => (
-                <tr key={submission.id}>
-                  <td>{submission.id}</td>
-                  <td>{submission.studentId}</td>
-                  <td>{submission.fileName}</td>
-                  <td>{submission.date}</td>
-                  <td>
-                    <button onClick={() => handleDownload(submission.fileName)}>Download</button>
-                  </td>
+      {role === 'teacher' && isCurating ? (
+        <>
+          {isEditing ? (
+            <div className="edit-form">
+              <h3>Edit Assignment</h3>
+              <form>
+                <div className="form-group">
+                  <label htmlFor="title">Title:</label>
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value={editedAssignment.title}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="description">Description:</label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={editedAssignment.description}
+                    onChange={handleInputChange}
+                    required
+                    rows="5"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="deadline">Deadline:</label>
+                  <input
+                    type="date"
+                    id="deadline"
+                    name="deadline"
+                    value={editedAssignment.deadline}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="edit-course-actions">
+                <button className="save-button" type="save-button" onClick={handleSaveEdit}>Save</button>
+                <button className="cancel-button" type="cancel-button" onClick={handleCancelEdit}>Cancel</button>
+                <button className="delete-button" type="delete-button" onClick={handleDeleteAssignment}>Delete Assignment</button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <button className="edit-button" onClick={handleEdit}>Edit Assignment</button>
+          )}
+
+          <div className="submissions-table">
+            <h3>Student Submissions</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Student ID</th>
+                  <th>File Name</th>
+                  <th>Date</th>
+                  <th>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {submissions.map((submission) => (
+                  <tr key={submission.id}>
+                    <td>{submission.id}</td>
+                    <td>{submission.studentId}</td>
+                    <td>{submission.fileName}</td>
+                    <td>{submission.date}</td>
+                    <td>
+                      <button onClick={() => handleDownload(submission.fileName)}>Download</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       ) : (
-        role === 'student' && (
+        role === 'student' && isEnrolled && (
           <>
             <div className="assignment-status">
               <h3>Assignment Status</h3>

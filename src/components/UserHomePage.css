@@ -12,9 +12,10 @@
   margin-bottom: 16px;
 }
 
-.courses-list {
+.courses-list, .user-courses-list {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 10px;
 }
 

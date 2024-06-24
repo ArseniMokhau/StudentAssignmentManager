@@ -18,11 +18,17 @@ const placeholderCourses = [
   { id: 12, name: 'Course 12' },
 ];
 
+const placeholderUserCourses = [
+  { id: 1, name: 'User Course 1' },
+  { id: 2, name: 'User Course 2' },
+];
+
 const COURSES_PER_PAGE = 5;
 
 export const UserHomePage = () => {
   const { role } = useContext(AuthContext);
   const [courses, setCourses] = useState(placeholderCourses);
+  const [userCourses, setUserCourses] = useState(placeholderUserCourses);
   const [newCourseName, setNewCourseName] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -39,6 +45,13 @@ export const UserHomePage = () => {
 
   return (
     <div className="home-page">
+      <h2>{role === 'teacher' ? 'Courses You Curate' : 'Courses You Are Enrolled In'}</h2>
+      <div className="user-courses-list">
+        {userCourses.map(course => (
+          <Course key={course.id} course={course} />
+        ))}
+      </div>
+
       <h2>All Available Courses</h2>
       <div className="courses-list">
         {currentCourses.map(course => (

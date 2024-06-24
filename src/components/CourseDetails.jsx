@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link, Navigate } from 'react-router-dom';
 import { Assignment } from './Assignment';
 import './CourseDetails.css';
 import { AuthContext } from '../auth/AuthContext';
 
+// Placeholder assignments data
 const placeholderAssignments = [
   { id: 1, courseId: 1, title: 'Assignment 1', description: 'Description 1', deadline: '2024-07-01' },
   { id: 2, courseId: 1, title: 'Assignment 2', description: 'Description 2', deadline: '2024-07-10' },
@@ -27,9 +28,17 @@ export const CourseDetails = () => {
     description: '',
     deadline: '',
   });
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isCurating, setIsCurating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // Flag for editing mode
+  const [deletionSuccess, setDeletionSuccess] = useState(false);
+  const [editedCourse, setEditedCourse] = useState({
+    name: '',
+    description: '',
+  });
 
   useEffect(() => {
-    // Placeholder fetch course details by id
+    // Simulate fetching course details by id
     setCourse(placeholderCourse);
 
     // Fetch assignments for the course with id
@@ -37,7 +46,21 @@ export const CourseDetails = () => {
       assignment => assignment.courseId === parseInt(id)
     );
     setAssignments(courseAssignments);
+
+    // Placeholder checks for enrollment and curation
+    checkEnrollment();
+    checkCuration();
   }, [id]);
+
+  const checkEnrollment = () => {
+    // Placeholder function to simulate checking enrollment
+    setIsEnrolled(false);
+  };
+
+  const checkCuration = () => {
+    // Placeholder function to simulate checking curation
+    setIsCurating(false);
+  };
 
   const handleNewAssignmentChange = (e) => {
     const { name, value } = e.target;
@@ -59,14 +82,119 @@ export const CourseDetails = () => {
     setAssignments(assignments.filter(assignment => assignment.id !== assignmentId));
   };
 
+  const handleEditCourse = () => {
+    setIsEditing(true);
+    setEditedCourse({
+      name: course.name,
+      description: course.description,
+    });
+  };
+
+  const handleSaveEdit = () => {
+    // Simulate sending edit request to server
+    setCourse({
+      ...course,
+      name: editedCourse.name,
+      description: editedCourse.description,
+    });
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleDeleteCourse = () => {
+    setIsEditing(false);
+    setDeletionSuccess(true);
+  };
+
+  const requestEnrollment = () => {
+    setIsEnrolled(true)
+  };
+
+  const requestCuration = () => {
+    setIsCurating(true)
+  };
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setEditedCourse({
+      ...editedCourse,
+      [name]: value,
+    });
+  };
+
+  if (deletionSuccess) {
+    return <Navigate to="/" replace />;
+  }
+
   if (!course) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="course-details">
-      <h2>{course.name}</h2>
-      <p>{course.description}</p>
+      <h2>{isEditing ? (
+        <input
+          type="text"
+          name="name"
+          value={editedCourse.name}
+          onChange={handleInputChange}
+          className="edit-input"
+        />
+      ) : (
+        course.name
+      )}</h2>
+
+      <p>{isEditing ? (
+        <textarea
+          name="description"
+          value={editedCourse.description}
+          onChange={handleInputChange}
+          className="edit-textarea"
+        />
+      ) : (
+        course.description
+      )}</p>
+
+      {role === 'teacher' && isCurating && !isEditing && (
+        <button className="edit-button" onClick={handleEditCourse}>
+          Edit Course
+        </button>
+      )}
+
+      {role === 'teacher' && isCurating && isEditing && (
+        <div className="edit-course-actions">
+          <button className="save-button" onClick={handleSaveEdit}>
+            Save
+          </button>
+          <button className="cancel-button" onClick={handleCancelEdit}>
+            Cancel
+          </button>
+          <button className="delete-button" onClick={handleDeleteCourse}>
+            Delete Course
+        </button>
+        </div>
+      )}
+
+      {role === 'student' && !isEnrolled && (
+        <button className="enroll-button" onClick={requestEnrollment}>
+          Enroll
+        </button>
+      )}
+      {role === 'student' && isEnrolled && (
+        <p className="enrolled-message">You are enrolled in this course.</p>
+      )}
+      {role === 'teacher' && !isCurating && (
+        <button className="enroll-button" onClick={requestCuration}>
+          Request Curation
+        </button>
+      )}
+      {role === 'teacher' && isCurating && (
+        <p className="enrolled-message">You are curating this course.</p>
+      )}
+
       <h3>Assignments</h3>
       <div className="assignments-list">
         {assignments.map(assignment => (
@@ -74,7 +202,7 @@ export const CourseDetails = () => {
             <div className="assignment-details">
               <Assignment assignment={assignment} />
             </div>
-            {role === 'teacher' && (
+            {role === 'teacher' && isCurating && (
               <div className="assignment-actions">
                 <button onClick={() => handleDeleteAssignment(assignment.id)}>Delete</button>
               </div>
@@ -83,7 +211,7 @@ export const CourseDetails = () => {
         ))}
       </div>
 
-      {role === 'teacher' && (
+      {role === 'teacher' && isCurating && (
         <div className="new-assignment-form">
           <h3>Create New Assignment</h3>
           <form onSubmit={handleCreateAssignment}>
