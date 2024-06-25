@@ -1,6 +1,22 @@
 {
   "Files": [
     {
+      "Id": "D:\\University\\webowe\\StudentAssignmentManager22.06\\Backend\\WAP_Project\\wwwroot\\Assignments\\42555049-aa8e-4f24-9384-4a1208569499\\2798aae3-2325-4194-a881-d3beb80c5ab5\\ab36f24e-3eb9-484e-8376-b568202eb75b.pdf",
+      "PackagePath": "staticwebassets\\Assignments\\42555049-aa8e-4f24-9384-4a1208569499\\2798aae3-2325-4194-a881-d3beb80c5ab5\\ab36f24e-3eb9-484e-8376-b568202eb75b.pdf"
+    },
+    {
+      "Id": "D:\\University\\webowe\\StudentAssignmentManager22.06\\Backend\\WAP_Project\\wwwroot\\Assignments\\42555049-aa8e-4f24-9384-4a1208569499\\74415ff4-7496-4386-b035-9ef95c8b2ab7\\74b3d5e8-380a-4aaf-9372-5b6696f69fe5.pdf",
+      "PackagePath": "staticwebassets\\Assignments\\42555049-aa8e-4f24-9384-4a1208569499\\74415ff4-7496-4386-b035-9ef95c8b2ab7\\74b3d5e8-380a-4aaf-9372-5b6696f69fe5.pdf"
+    },
+    {
+      "Id": "D:\\University\\webowe\\StudentAssignmentManager22.06\\Backend\\WAP_Project\\wwwroot\\Assignments\\e3a98289-e313-4742-a06a-31dbc2d5366d\\2798aae3-2325-4194-a881-d3beb80c5ab5\\8120dbc9-b09e-42f0-97db-4d73de528c72.pdf",
+      "PackagePath": "staticwebassets\\Assignments\\e3a98289-e313-4742-a06a-31dbc2d5366d\\2798aae3-2325-4194-a881-d3beb80c5ab5\\8120dbc9-b09e-42f0-97db-4d73de528c72.pdf"
+    },
+    {
+      "Id": "D:\\University\\webowe\\StudentAssignmentManager22.06\\Backend\\WAP_Project\\wwwroot\\Assignments\\e3a98289-e313-4742-a06a-31dbc2d5366d\\2798aae3-2325-4194-a881-d3beb80c5ab5\\c29d61d0-0063-4764-bbb2-3c18549bfe92.pdf",
+      "PackagePath": "staticwebassets\\Assignments\\e3a98289-e313-4742-a06a-31dbc2d5366d\\2798aae3-2325-4194-a881-d3beb80c5ab5\\c29d61d0-0063-4764-bbb2-3c18549bfe92.pdf"
+    },
+    {
       "Id": "D:\\University\\webowe\\StudentAssignmentManager22.06\\Backend\\WAP_Project\\wwwroot\\Uploads\\cfc55265-87fc-4410-a5bd-24b16638e0d6.pdf",
       "PackagePath": "staticwebassets\\Uploads\\cfc55265-87fc-4410-a5bd-24b16638e0d6.pdf"
     },

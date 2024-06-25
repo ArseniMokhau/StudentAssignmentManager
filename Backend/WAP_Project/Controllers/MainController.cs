@@ -366,6 +366,34 @@ namespace WAP_Project.Controllers
             var repositories = _context.Repositories.ToList();
             return Ok(repositories);
         }
+        [HttpGet("repository-info")] //!!!!!!!!!!! descriptoin
+        public IActionResult GetRepositoryInfo([FromQuery] string repositoryId)
+        {
+            try
+            {
+                var repository = _context.Repositories
+                    .Where(r => r.RepositoryId == repositoryId)
+                    .Select(r => new
+                    {
+                        r.RepositoryName,
+                        //r.Description // "Описание репозитория" 
+                    })
+                    .FirstOrDefault();
+
+                if (repository != null)
+                {
+                    return Ok(repository);
+                }
+
+                return NotFound("Repository not found");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error retrieving repository info: {ex.Message}");
+                return StatusCode(500, "An error occurred while retrieving repository info");
+            }
+        }
+
 
         [HttpDelete("delete-repository")]
         public IActionResult DeleteCourse([FromQuery] string repositoryId)
@@ -444,6 +472,33 @@ namespace WAP_Project.Controllers
             var assignments = _context.RepositoryAssigments.ToList();
             return Ok(assignments);
         }
+        [HttpGet("assignment-info")]
+        public IActionResult GetAssignmentInfo([FromQuery] string assignmentId)
+        {
+            try
+            {
+                var assignment = _context.RepositoryAssigments
+                    .Where(a => a.AssignmentId == assignmentId)
+                    .Select(a => new
+                    {
+                        a.Title,
+                        a.Description
+                    })
+                    .FirstOrDefault();
+
+                if (assignment != null)
+                {
+                    return Ok(assignment);
+                }
+
+                return NotFound("Assignment not found");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error retrieving assignment info: {ex.Message}");
+                return StatusCode(500, "An error occurred while retrieving assignment info");
+            }
+        }
 
         [HttpPut("update-assignment")]
         public IActionResult UpdateAssignment([FromBody] RepositoryAssigments updatedAssignment, [FromQuery] string teacherId)
@@ -463,7 +518,7 @@ namespace WAP_Project.Controllers
             var teacherRepository = _context.TeacherRepositories.FirstOrDefault(tr => tr.TeacherId == teacherId && tr.RepositoriesRepositoryId == assignment.RepositoryId);
             if (teacherRepository == null)return BadRequest("Teacher is not associated with this repository");
 
-            // Update assignment details
+            // Update assignment details //DATA  AAAAAAAAAAAAA !!!!!!!!!!!!!!!!!
             assignment.Title = updatedAssignment.Title;
             assignment.Description = updatedAssignment.Description;
 
@@ -485,8 +540,54 @@ namespace WAP_Project.Controllers
               return Ok("Assignment deleted successfully");
           }
 
-          // Endpoint for students to request access to a course
-          [HttpPost("request-access")]
+        //!!!!!!!!!!!!!
+        [HttpGet("is-student-enrolled")]
+        public IActionResult IsStudentEnrolled([FromQuery] string courseId, [FromQuery] string studentId)
+        {
+            try
+            {
+                var studentCourse = _context.StudentRepositories
+                    .FirstOrDefault(sr => sr.RepositoriesRepositoryId == courseId && sr.StudentId == studentId);
+
+                if (studentCourse != null)
+                {
+                    return Ok(true);
+                }
+
+                return Ok(false);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error checking student enrollment: {ex.Message}");
+                return StatusCode(500, "An error occurred while checking student enrollment");
+            }
+        }
+
+        [HttpGet("is-teacher-associated")]
+        public IActionResult IsTeacherAssociated([FromQuery] string courseId, [FromQuery] string teacherId)
+        {
+            try
+            {
+                var teacherCourse = _context.TeacherRepositories
+                    .FirstOrDefault(tr => tr.RepositoriesRepositoryId == courseId && tr.TeacherId == teacherId);
+
+                if (teacherCourse != null)
+                {
+                    return Ok(true);
+                }
+
+                return Ok(false);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error checking teacher association: {ex.Message}");
+                return StatusCode(500, "An error occurred while checking teacher association");
+            }
+        }
+
+
+        // Endpoint for students to request access to a course
+        [HttpPost("request-access")]
           public IActionResult RequestAccessToCourse([FromQuery] string courseId, [FromQuery] string studentId)
           {
               try
