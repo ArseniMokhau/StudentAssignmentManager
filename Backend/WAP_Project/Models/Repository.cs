@@ -4,6 +4,7 @@
     {
         public string RepositoryId { get; set; }
         public string RepositoryName { get; set; }
+        public string Description { get; set; }
         /*
                 public ICollection<TeacherRepository> TeacherRepositories { get; set; }
                 public ICollection<StudentRepository> StudentRepositories { get; set; }

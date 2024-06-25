@@ -342,7 +342,7 @@ namespace WAP_Project.Controllers
 
         // Create course endpoint for teachers
         [HttpPost("create-repository")]
-        public IActionResult CreateCourse([FromQuery] string repositoryName, [FromQuery] string teacherId)
+        public IActionResult CreateCourse([FromQuery] string repositoryName, [FromQuery] string description, [FromQuery] string teacherId)
         {
             // Validate model
             if (!ModelState.IsValid)
@@ -362,7 +362,8 @@ namespace WAP_Project.Controllers
             var newCourse = new Repository
             {
                 RepositoryId = Guid.NewGuid().ToString(),
-                RepositoryName = repositoryName
+                RepositoryName = repositoryName,
+                Description = description
                 /*TeacherRepositories = new List<TeacherRepository>(),
                  StudentRepositories = new List<StudentRepository>(),
                  RepositoriesAssigments = new List<RepositoryAssigments>()*/
@@ -403,7 +404,7 @@ namespace WAP_Project.Controllers
                     .Select(r => new
                     {
                         r.RepositoryName,
-                        //r.Description // "Описание репозитория" 
+                        r.Description // "Описание репозитория" 
                     })
                     .FirstOrDefault();
 
