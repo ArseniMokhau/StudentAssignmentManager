@@ -16,6 +16,9 @@ namespace WAP_Project.Models
         public string StudentId { get; set; }
         public Student Student { get; set; }
 
+     /*   [ForeignKey("TeacherRepositories")]
+        public string TeacherRepositoriesId { get; set; }
+        public TeacherRepository TeacherRepositories { get; set; }*/
         public DateTime RequestTime { get; set; }
     }
 }
