@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using WAP_Project.Models;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Hosting;
+using System.Data;
 
 namespace WAP_Project.Controllers
 {
@@ -106,13 +107,13 @@ namespace WAP_Project.Controllers
             //если Username одинаковые в ученике и учителе?
             var student = _context.Students
                 .FirstOrDefault(u => u.Username == model.Username && u.PasswordHash == model.PasswordHash);
-            if (student != null) return GenerateAndReturnToken(student.StudentId, student.PasswordHash);
+            if (student != null) return GenerateAndReturnToken(student.StudentId, student.Role);
 
             Console.WriteLine($"Searching for teacher: Username = {model.Username}, PasswordHash = {model.PasswordHash}");
 
             var teacher = _context.Teachers
                 .FirstOrDefault(u => u.Username == model.Username && u.PasswordHash == model.PasswordHash);
-            if (teacher != null) return GenerateAndReturnToken(teacher.TeacherId, teacher.PasswordHash);
+            if (teacher != null) return GenerateAndReturnToken(teacher.TeacherId, teacher.Role);
 
             //_context.SaveChanges();
             return BadRequest("Invalid username or password");
@@ -254,13 +255,13 @@ namespace WAP_Project.Controllers
             if (existingToken != null)
             {
                 // Token already exists, return it
-                return Ok(new { Token = existingToken.Token });
+                return Ok(new { Token = existingToken.Token, Role = role });
             }
 
             // Create JWT token
             var token = GenerateJwtToken(username, role);
             AddTokenToDatabase(username, token);
-            return Ok(new { Token = token });
+            return Ok(new { Token = token, Role = role });
         }
 
         private void AddTokenToDatabase(string userId, string token)
