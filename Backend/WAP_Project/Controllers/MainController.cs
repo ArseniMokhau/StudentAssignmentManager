@@ -524,51 +524,101 @@ namespace WAP_Project.Controllers
         }
 
 
-       /* [HttpGet("get all assignments from student repo ")]
-        public IActionResult GetAssignmentFiles([FromQuery] string assignmentId)
+     /*   // Endpoint for downloading student assignment files
+        [HttpGet("download-assignment-file")]
+        public IActionResult DownloadAssignmentFile([FromQuery] string assignmentId, [FromQuery] string teacherId, [FromQuery] string fileName)
         {
-            // Find the assignment by assignmentId
-            var assignment = _context.RepositoryAssigments.FirstOrDefault(a => a.AssignmentId == assignmentId);
-            if (assignment == null)
+            try
             {
-                return NotFound("Assignment not found");
-            }
-
-            // Get all student assignments for the specified assignment
-            var studentAssignments = _context.studentAssignments
-                .Include(sa => sa.Student)
-                .Where(sa => sa.AssignmentId == assignmentId)
-                .ToList();
-
-            var uploadedFiles = new List<object>();
-
-            // Iterate through each student assignment to get uploaded files
-            foreach (var studentAssignment in studentAssignments)
-            {
-                var studentId = studentAssignment.StudentId;
-                var studentName = studentAssignment.Student?.Username;
-
-                var uploadsDirectory = Path.Combine(_environment.WebRootPath, "Assignments", assignmentId, studentId);
-
-                // Check if the directory exists
-                if (Directory.Exists(uploadsDirectory))
+                // Find the assignment by assignmentId
+                var assignment = _context.RepositoryAssigments.FirstOrDefault(a => a.AssignmentId == assignmentId);
+                if (assignment == null)
                 {
-                    var fileNames = Directory.GetFiles(uploadsDirectory).Select(Path.GetFileName);
-                    foreach (var fileName in fileNames)
-                    {
-                        uploadedFiles.Add(new
-                        {
-                            StudentId = studentId,
-                            StudentName = studentName,
-                            FileName = fileName,
-                            SubmissionDate = studentAssignment.SubmissionDate
-                        });
-                    }
+                    return NotFound("Assignment not found");
                 }
-            }
 
-            return Ok(uploadedFiles);
-        }*/
+                // Check if the teacher is associated with the repository (course)
+                var teacherRepository = _context.TeacherRepositories
+                    .FirstOrDefault(tr => tr.RepositoriesRepositoryId == assignment.RepositoryId && tr.TeacherId == teacherId);
+                if (teacherRepository == null)
+                {
+                    return Unauthorized("Teacher is not associated with this repository (course)");
+                }
+
+                // Construct the file path
+                var uploadsDirectory = Path.Combine(_environment.WebRootPath, "Assignments", assignmentId);
+                var filePath = Path.Combine(uploadsDirectory, fileName);
+
+                // Check if the file exists
+                if (!System.IO.File.Exists(filePath))
+                {
+                    return NotFound("File not found");
+                }
+
+                // Read the file into a memory stream
+                var memory = new MemoryStream();
+                using (var stream = new FileStream(filePath, FileMode.Open))
+                {
+                    stream.CopyTo(memory);
+                }
+                memory.Position = 0;
+
+                // Return the file as a downloadable attachment
+                return File(memory, "application/octet-stream", fileName);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Error downloading assignment file: {ex.Message}");
+                return StatusCode(500, "An error occurred while downloading assignment file");
+            }
+        }
+*/
+        /* [HttpGet("get all assignments from student repo ")]
+         public IActionResult GetAssignmentFiles([FromQuery] string assignmentId)
+         {
+             // Find the assignment by assignmentId
+             var assignment = _context.RepositoryAssigments.FirstOrDefault(a => a.AssignmentId == assignmentId);
+             if (assignment == null)
+             {
+                 return NotFound("Assignment not found");
+             }
+
+             // Get all student assignments for the specified assignment
+             var studentAssignments = _context.studentAssignments
+                 .Include(sa => sa.Student)
+                 .Where(sa => sa.AssignmentId == assignmentId)
+                 .ToList();
+
+             var uploadedFiles = new List<object>();
+
+             // Iterate through each student assignment to get uploaded files
+             foreach (var studentAssignment in studentAssignments)
+             {
+                 var studentId = studentAssignment.StudentId;
+                 var studentName = studentAssignment.Student?.Username;
+
+                 var uploadsDirectory = Path.Combine(_environment.WebRootPath, "Assignments", assignmentId, studentId);
+
+                 // Check if the directory exists
+                 if (Directory.Exists(uploadsDirectory))
+                 {
+                     var fileNames = Directory.GetFiles(uploadsDirectory).Select(Path.GetFileName);
+                     foreach (var fileName in fileNames)
+                     {
+                         uploadedFiles.Add(new
+                         {
+                             StudentId = studentId,
+                             StudentName = studentName,
+                             FileName = fileName,
+                             SubmissionDate = studentAssignment.SubmissionDate
+                         });
+                     }
+                 }
+             }
+
+             return Ok(uploadedFiles);
+         }*/
 
         // POST api/assignment/create
         [HttpPost("create-assignment")]
@@ -860,36 +910,36 @@ namespace WAP_Project.Controllers
             }
         }
 
-/*        [HttpGet("get-active-access-requests")]
-        public IActionResult GetActiveAccessRequests([FromQuery] string teacherToken)
+        [HttpGet("get-active-access-requests")]
+        public IActionResult GetActiveAccessRequests([FromQuery] string teacherId)
         {
             try
             {
                 // Find the teacher by token
-                var teacherTokenObj = _context.UserTokens.FirstOrDefault(t => t.Token == teacherToken);
-                if (teacherTokenObj == null)
-                {
-                    return Unauthorized("Invalid token");
-                }
+                var teacherTokenObj = _context.UserTokens.FirstOrDefault(t => t.UserId == teacherId);
+                if (teacherTokenObj == null) return Unauthorized("Invalid token");
 
                 // Find the teacher by teacherId
                 var teacher = _context.Teachers.FirstOrDefault(t => t.TeacherId == teacherTokenObj.UserId);
-                if (teacher == null)
-                {
-                    return Unauthorized("Teacher not found");
-                }
+                if (teacher == null) return Unauthorized("Teacher not found");
 
                 // Optionally, check if the teacher has the correct role
-                if (teacher.Role != "teacher")
-                {
-                    return Unauthorized("Teacher does not have permission to access this endpoint");
-                }
+                if (teacher.Role != "teacher" && teacher.Role != "Teacher") return Unauthorized("Teacher does not have permission to access this endpoint");
 
-                // Get all active access requests for the teacher
+                // Get all active access requests for the teacher's courses
                 var activeRequests = _context.RepositoryAccessRequests
                     .Include(r => r.Course)
                     .Include(r => r.Student)
-                    .Where(r => r.TeacherRepositories.Any(tr => tr.TeacherId == teacher.TeacherId)) // Filter by teacher's courses
+                    .Where(r => _context.TeacherRepositories
+                        .Any(tr => tr.RepositoriesRepositoryId == r.CourseId && tr.TeacherId == teacher.TeacherId))
+                    .Select(r => new
+                    {
+                        repositoryAccessRequestId = r.RepositoryAccessRequestId,
+                        courseId = r.CourseId,
+                        username = r.Student.Username, // Assuming Student has a Username property
+                        role = r.Student.Role,         // Assuming Student has a Role property
+                        requestTime = r.RequestTime
+                    })
                     .ToList();
 
                 return Ok(activeRequests);
@@ -900,7 +950,7 @@ namespace WAP_Project.Controllers
                 Console.WriteLine($"Error retrieving active access requests: {ex.Message}");
                 return StatusCode(500, "An error occurred while retrieving active access requests");
             }
-        }*/
+        }
 
 
     }
