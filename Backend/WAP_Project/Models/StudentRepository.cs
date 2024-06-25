@@ -8,7 +8,7 @@ namespace WAP_Project.Models
         [Key]
         public string StudentRepositoryId { get; set; }
 
-        [ForeignKey("RepositoryAssignments")]
+        [ForeignKey("Repository")]
         public string RepositoriesRepositoryId { get; set; }
         public Repository Repository { get; set; }
 

@@ -454,7 +454,7 @@ namespace WAP_Project.Controllers
             return Ok("Repository deleted successfully");
         }
 
-        [HttpGet("teacher-get-all-assignments by teacher ")]
+        [HttpGet("teacher-get all sended assignments")]
         public IActionResult GetAssignmentFiles([FromQuery] string assignmentId, [FromQuery] string teacherId)
         {
             try
@@ -610,7 +610,7 @@ namespace WAP_Project.Controllers
           }
 
         [HttpGet("all-assignments")]
-        public ActionResult<IEnumerable<Repository>> GetAssignments()//ZADANIA OD KAZDOGO REPOSITORIA DURA BLYA
+        public ActionResult<IEnumerable<Repository>> GetAssignments()
         {
             var assignments = _context.RepositoryAssigments.ToList();
             return Ok(assignments);
@@ -669,14 +669,14 @@ namespace WAP_Project.Controllers
         }
 
 
-        [HttpPut("update-assignment")]
-        public IActionResult UpdateAssignment([FromBody] RepositoryAssigments updatedAssignment, [FromQuery] string teacherId)
+        [HttpPut("update-assignment")]//date !!
+        public IActionResult UpdateAssignment([FromQuery] string assignmentId, [FromQuery] string title, [FromQuery] string description, [FromQuery] string teacherId)
         {
             // Validate the model
             if (!ModelState.IsValid)return BadRequest(ModelState);
 
             // Check if the assignment exists
-            var assignment = _context.RepositoryAssigments.FirstOrDefault(a => a.AssignmentId == updatedAssignment.AssignmentId);
+            var assignment = _context.RepositoryAssigments.FirstOrDefault(a => a.AssignmentId == assignmentId);
             if (assignment == null)return NotFound("Assignment not found");
 
             // Check if the teacher exists
@@ -688,8 +688,8 @@ namespace WAP_Project.Controllers
             if (teacherRepository == null)return BadRequest("Teacher is not associated with this repository");
 
             // Update assignment details //DATA  AAAAAAAAAAAAA !!!!!!!!!!!!!!!!!
-            assignment.Title = updatedAssignment.Title;
-            assignment.Description = updatedAssignment.Description;
+            assignment.Title = title;
+            assignment.Description = description;
 
             _context.SaveChanges();
 
@@ -709,7 +709,6 @@ namespace WAP_Project.Controllers
               return Ok("Assignment deleted successfully");
           }
 
-        //!!!!!!!!!!!!!
         [HttpGet("is-student-enrolled")]
         public IActionResult IsStudentEnrolled([FromQuery] string courseId, [FromQuery] string studentId)
         {
@@ -720,10 +719,10 @@ namespace WAP_Project.Controllers
 
                 if (studentCourse != null)
                 {
-                    return Ok(true);
+                    return Ok(true); // Student is enrolled
                 }
 
-                return Ok(false);
+                return Ok(false); // Student is not enrolled
             }
             catch (Exception ex)
             {
@@ -731,6 +730,7 @@ namespace WAP_Project.Controllers
                 return StatusCode(500, "An error occurred while checking student enrollment");
             }
         }
+
 
         [HttpGet("is-teacher-associated")]
         public IActionResult IsTeacherAssociated([FromQuery] string courseId, [FromQuery] string teacherId)
