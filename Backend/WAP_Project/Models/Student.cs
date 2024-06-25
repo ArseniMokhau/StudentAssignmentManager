@@ -7,8 +7,8 @@
         public string PasswordHash { get; set; }
         public string Role { get; set; }
 
-        // Relationship: One student can have multiple submissions
-        public ICollection<Submission> Submissions { get; set; }
+        public ICollection<StudentRepository> StudentRepositories { get; set; }
+
         // Опционально: может быть обновлено после регистрации/входа
         //public string? Token { get; set; } // Разрешить NULL значения для поля Token
     }

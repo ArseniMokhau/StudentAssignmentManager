@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "Cp4K4RsLS5k7o4f3Od2iXw7qXMufAmM3+sIS4u9WN0g=",
+  "Hash": "+sBxMob446aE/WS1qtj7rrINZBuMh54erBJehO4sD6s=",
   "Source": "WAP_Project",
   "BasePath": "_content/WAP_Project",
   "Mode": "Default",
@@ -10,17 +10,17 @@
     {
       "Name": "WAP_Project\\wwwroot",
       "Source": "WAP_Project",
-      "ContentRoot": "D:\\University\\webowe\\registerLast.26.05\\Backend\\WAP_Project\\wwwroot\\",
+      "ContentRoot": "D:\\University\\webowe\\StudentAssignmentManager22.06\\Backend\\WAP_Project\\wwwroot\\",
       "BasePath": "_content/WAP_Project",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "D:\\University\\webowe\\registerLast.26.05\\Backend\\WAP_Project\\wwwroot\\readme.txt",
+      "Identity": "D:\\University\\webowe\\StudentAssignmentManager22.06\\Backend\\WAP_Project\\wwwroot\\readme.txt",
       "SourceId": "WAP_Project",
       "SourceType": "Discovered",
-      "ContentRoot": "D:\\University\\webowe\\registerLast.26.05\\Backend\\WAP_Project\\wwwroot\\",
+      "ContentRoot": "D:\\University\\webowe\\StudentAssignmentManager22.06\\Backend\\WAP_Project\\wwwroot\\",
       "BasePath": "_content/WAP_Project",
       "RelativePath": "readme.txt",
       "AssetKind": "All",
@@ -34,6 +34,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\readme.txt"
+    },
+    {
+      "Identity": "D:\\University\\webowe\\StudentAssignmentManager22.06\\Backend\\WAP_Project\\wwwroot\\Uploads\\cfc55265-87fc-4410-a5bd-24b16638e0d6.pdf",
+      "SourceId": "WAP_Project",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\University\\webowe\\StudentAssignmentManager22.06\\Backend\\WAP_Project\\wwwroot\\",
+      "BasePath": "_content/WAP_Project",
+      "RelativePath": "Uploads/cfc55265-87fc-4410-a5bd-24b16638e0d6.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Uploads\\cfc55265-87fc-4410-a5bd-24b16638e0d6.pdf"
     }
   ]
 }

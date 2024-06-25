@@ -12,43 +12,15 @@ namespace WAP_Project.Models
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserToken> UserTokens { get; set; }
-        public DbSet<Assignment> Assignments { get; set; }
-        public  DbSet<Submission> Submissions { get; set; }
         public DbSet<Repository> Repositories { get; set; }
-        public DbSet<TeacherRepository> TeacherRepositories { get; set;}
+        public DbSet<StudentRepository> StudentRepositories { get; set; }
+        public DbSet<TeacherRepository> TeacherRepositories { get; set; }
+        public DbSet<StudentAssignments> studentAssignments { get; set; }
+        public DbSet<RepositoryAssigments> RepositoryAssigments { get; set; }
+        public DbSet<RepositoryAccessRequest> RepositoryAccessRequests { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Submission>()
-                .HasOne(s => s.Student)
-                .WithMany(st => st.Submissions)
-                .HasForeignKey(s => s.StudentId);
 
-            modelBuilder.Entity<Submission>()
-                .HasOne(s => s.Assignment)
-                .WithMany(a => a.Submissions)
-                .HasForeignKey(s => s.AssignmentId);
-
-            modelBuilder.Entity<Assignment>()
-                .HasOne(a => a.Repository)
-                .WithMany(r => r.Assignments)
-                .HasForeignKey(a => a.RepositoryId);
-
-            modelBuilder.Entity<TeacherRepository>()
-                .HasKey(tr => new { tr.TeacherId, tr.RepositoryId });
-
-            modelBuilder.Entity<TeacherRepository>()
-                .HasOne(tr => tr.Teacher)
-                .WithMany(t => t.TeacherRepositories)
-                .HasForeignKey(tr => tr.TeacherId);
-
-            modelBuilder.Entity<TeacherRepository>()
-                .HasOne(tr => tr.Repository)
-                .WithMany(r => r.TeacherRepositories)
-                .HasForeignKey(tr => tr.RepositoryId);
-        }
     }
 }
 

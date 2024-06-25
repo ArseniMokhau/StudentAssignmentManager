@@ -41,29 +41,12 @@ namespace WAP_Project.Controllers
         public IActionResult Register([FromBody] UserRegisterModel model)
         {
 
-            //// Check if username already exists
-            //if (_context.Users.Any(u => u.Username == model.Username))
-            //{
-            //    return BadRequest("Username already exists");
-            //}
-
-            //// We should hash the password before storing it
-            //var newUser = new User
-            //{
-            //    Id = Guid.NewGuid().ToString(),
-            //    Username = model.Username,
-            //    Password = model.Password,
-            //    Role = model.Role
-            //};
-            //_context.Users.Add(newUser);
-            //_context.SaveChanges();
-
             //if we need it
             if (!IfValidateUsername(model.Username)) return BadRequest("Invalid username format");
 
-                // Check if username already exists
-                if (_context.Students.Any(u => u.Username == model.Username && u.Role == model.Role) || 
-                    _context.Teachers.Any(u => u.Username == model.Username && u.Role == model.Role))
+            // Check if username already exists
+            if (_context.Students.Any(u => u.Username == model.Username && u.Role == model.Role) ||
+                _context.Teachers.Any(u => u.Username == model.Username && u.Role == model.Role))
             {
                 return BadRequest("Username already exists");
             }
@@ -111,30 +94,12 @@ namespace WAP_Project.Controllers
             string pattern = @"^[a-zA-Z]{3,20}$";
             return Regex.IsMatch(username, pattern);
         }
-       
+
         // Login endpoint
         [HttpPost("login")]
         //проверка базы 
         public IActionResult Login([FromBody] UserLoginModel model)
         {
-            //// Check if user exists
-            //var user = _users.SingleOrDefault(u => u.Username == model.Username && u.Password == model.Password);
-            //if (user == null)
-            //{
-            //    return BadRequest("Invalid username or password");
-            //}
-
-            //try
-            //{
-            //    var student = _usersStudent.FirstOrDefault(u => u.Username == model.Username && u.PasswordHash == model.Password);
-            //    var teacher = _usersTeacher.FirstOrDefault(u => u.Username.Equals(model.Username) && u.PasswordHash.Equals(model.Password));
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine($"Error: {ex.Message}");
-            //    return BadRequest("An error occurred while processing your request.");
-            //}
-
 
             Console.WriteLine($"Username: {model.Username}, PasswordHash: {model.PasswordHash}");
             Console.WriteLine($"Searching for student: Username = {model.Username}, PasswordHash = {model.PasswordHash}");
@@ -144,15 +109,15 @@ namespace WAP_Project.Controllers
             if (student != null) return GenerateAndReturnToken(student.StudentId, student.PasswordHash);
 
             Console.WriteLine($"Searching for teacher: Username = {model.Username}, PasswordHash = {model.PasswordHash}");
-           
+
             var teacher = _context.Teachers
-                .FirstOrDefault(u => u.Username == model.Username && u.PasswordHash == model.PasswordHash); 
+                .FirstOrDefault(u => u.Username == model.Username && u.PasswordHash == model.PasswordHash);
             if (teacher != null) return GenerateAndReturnToken(teacher.TeacherId, teacher.PasswordHash);
-           
+
             //_context.SaveChanges();
             return BadRequest("Invalid username or password");
-           
-            
+
+
             //// Create JWT token
             //var token = GenerateJwtToken(user);
             //return Ok(new { Token = token });
@@ -199,8 +164,69 @@ namespace WAP_Project.Controllers
             return Ok(new { UploadedFiles = uploadedFileInfos });
         }
 
+           // Endpoint for students to upload files for assignments
+          [HttpPost("upload-assignment-file")]
+         public IActionResult UploadAssignmentFile([FromQuery] string assignmentId, /* List<IFormFile> files,*/ [FromQuery] string studentId)
+          {
+            //связано с ключем в таблице StudentAssignments(+ проебалась и не заметила как в таблице создала  RepositoryAssigments (без n)
+
+            var assignment = _context.RepositoryAssigments.FirstOrDefault(a => a.AssignmentId == assignmentId);
+              if (assignment == null) return BadRequest("Assignment not found");
+            //if student exist at this repo
+
+
+            // Check if the student  exists
+            var student = _context.Students.FirstOrDefault(s => s.StudentId == studentId);
+            if (student == null) return BadRequest("Student not found");
+
+            // Create a student assignment record
+            var StudentAssignment = new StudentAssignments
+            {
+                StudentAssignmentId = Guid.NewGuid().ToString(),
+                Title = assignment.Title,
+                // Deadline = assignment.Deadline, // Assuming deadline is relevant to student's submission
+                Deadline = DateTime.UtcNow,
+                SubmissionDate = DateTime.UtcNow, // Store the submission date
+                AssignmentId = assignmentId,
+                RepositoryAssigments = assignment,
+                StudentId = studentId,
+                Student = student
+            };
+
+            _context.studentAssignments.Add(StudentAssignment);
+            _context.SaveChanges();
+
+            return Ok("Course created successfully");
+            /*   var uploadsDirectory = Path.Combine(_environment.WebRootPath, "Assignments", assignmentId, studentId);
+
+                 if (!Directory.Exists(uploadsDirectory))
+                 {
+                     Directory.CreateDirectory(uploadsDirectory);
+                 }
+
+                 var uploadedFileInfos = new List<string>();
+
+                 foreach (var file in files)
+                 {
+                     if (file.Length > 0)
+                     {
+                         var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                         var filePath = Path.Combine(uploadsDirectory, fileName);
+
+                         using (var stream = new FileStream(filePath, FileMode.Create))
+                         {
+                             file.CopyTo(stream);
+                         }
+
+                         uploadedFileInfos.Add(filePath);
+                     }
+                 }
+
+                 return Ok(new { UploadedFiles = uploadedFileInfos });*/
+        }
         // Endpoint for downloading files
         [HttpGet("download/{fileName}")]
+
         public IActionResult DownloadFile(string fileName)
         {
             var uploadsDirectory = Path.Combine(_environment.WebRootPath, "Uploads");
@@ -237,7 +263,6 @@ namespace WAP_Project.Controllers
             return Ok(new { Token = token });
         }
 
-        //не возврашает токен   _context.SaveChanges(); ОШИБКА
         private void AddTokenToDatabase(string userId, string token)
         {
             var newToken = new UserToken
@@ -276,9 +301,285 @@ namespace WAP_Project.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+
+        // Create course endpoint for teachers
+        [HttpPost("create-repository")]
+        public IActionResult CreateCourse([FromBody] Repository repository, [FromQuery] string teacherId)
+        {
+            // Validate model
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Check if teacher exists
+            var teacher = _context.Teachers.FirstOrDefault(t => t.TeacherId == teacherId);
+            if (teacher == null)
+            {
+                Console.WriteLine($"Teacher not found");
+                return BadRequest("Teacher not found");
+            }
+
+            // Create new course
+            var newCourse = new Repository
+            {
+                RepositoryId = Guid.NewGuid().ToString(),
+                RepositoryName = repository.RepositoryName
+               /*TeacherRepositories = new List<TeacherRepository>(),
+                StudentRepositories = new List<StudentRepository>(),
+                RepositoriesAssigments = new List<RepositoryAssigments>()*/
+            };
+
+            _context.Repositories.Add(newCourse);
+            _context.SaveChanges(); // Save changes to generate RepositoryId
+
+            // Create entry in TeacherRepository
+            var teacherRepository = new TeacherRepository
+            {
+                TeacherRepositoryId = Guid.NewGuid().ToString(),
+                RepositoriesRepositoryId = newCourse.RepositoryId,// Course id
+                TeacherId = teacher.TeacherId,
+                Repositories = newCourse,
+                Teachers = teacher
+            };
+
+            _context.TeacherRepositories.Add(teacherRepository);
+            _context.SaveChanges();
+
+            return Ok("Course created successfully");
+        }
+
+        [HttpGet("all-repository")]
+        public ActionResult<IEnumerable<Repository>> GetRepositories()
+        {
+            var repositories = _context.Repositories.ToList();
+            return Ok(repositories);
+        }
+
+        [HttpDelete("delete-repository")]
+        public IActionResult DeleteCourse([FromQuery] string repositoryId)
+        {
+            // Check if repository exists
+            var repository = _context.Repositories.FirstOrDefault(r => r.RepositoryId == repositoryId);
+
+            if (repository == null)
+            {
+                return NotFound("Repository not found");
+            }
+
+            // Remove all related assignments
+            var assignments = _context.RepositoryAssigments.Where(a => a.RepositoryId == repositoryId).ToList();
+            _context.RepositoryAssigments.RemoveRange(assignments);
+
+            // Remove all teacher associations
+            var teacherRepositories = _context.TeacherRepositories.Where(tr => tr.RepositoriesRepositoryId == repositoryId).ToList();
+            _context.TeacherRepositories.RemoveRange(teacherRepositories);
+
+            // Remove all student associations
+            var studentRepositories = _context.StudentRepositories.Where(sr => sr.RepositoriesRepositoryId == repositoryId).ToList();
+            _context.StudentRepositories.RemoveRange(studentRepositories);
+
+            // Remove the repository
+            _context.Repositories.Remove(repository);
+
+            // Save all changes
+            _context.SaveChanges();
+
+            return Ok("Repository deleted successfully");
+        }
+
+        // POST api/assignment/create
+        [HttpPost("create-assignment")]
+          public IActionResult CreateAssignment([FromBody] RepositoryAssigments assignmentRepo, [FromQuery] string teacherId)
+          {
+              //if (!ModelState.IsValid) return BadRequest(ModelState);
+
+              // Check if repository (course) exists
+              var repository = _context.Repositories.FirstOrDefault(r => r.RepositoryId == assignmentRepo.RepositoryId);
+              if (repository == null) return BadRequest("Repository not found");
+
+              // Check if teacher exists (assuming you have a way to authenticate the teacher)
+              var teacher = _context.Teachers.FirstOrDefault(t => t.TeacherId == teacherId);
+              if (teacher == null)
+              {
+                  return BadRequest("Teacher not found");
+              }
+
+              // Check if the teacher is associated with the repository
+              var teacherRepository = _context.TeacherRepositories.FirstOrDefault(tr => tr.TeacherId == teacherId && tr.RepositoriesRepositoryId == assignmentRepo.RepositoryId);
+              if (teacherRepository == null)
+              {
+                  return BadRequest("Teacher is not associated with this repository");
+              }
+
+              // Create new assignment
+              var assignment = new RepositoryAssigments
+              {
+                  AssignmentId = Guid.NewGuid().ToString(),
+                  RepositoryId = assignmentRepo.RepositoryId,
+                  Title = assignmentRepo.Title,
+                  Description = assignmentRepo.Description
+              };
+
+              _context.RepositoryAssigments.Add(assignment);
+              _context.SaveChanges();
+
+              return Ok("Assignment created successfully");
+          }
+
+        [HttpGet("all-assignments")]
+        public ActionResult<IEnumerable<Repository>> GetAssignments()
+        {
+            var assignments = _context.RepositoryAssigments.ToList();
+            return Ok(assignments);
+        }
+
+        [HttpPut("update-assignment")]
+        public IActionResult UpdateAssignment([FromBody] RepositoryAssigments updatedAssignment, [FromQuery] string teacherId)
+        {
+            // Validate the model
+            if (!ModelState.IsValid)return BadRequest(ModelState);
+
+            // Check if the assignment exists
+            var assignment = _context.RepositoryAssigments.FirstOrDefault(a => a.AssignmentId == updatedAssignment.AssignmentId);
+            if (assignment == null)return NotFound("Assignment not found");
+
+            // Check if the teacher exists
+            var teacher = _context.Teachers.FirstOrDefault(t => t.TeacherId == teacherId);
+            if (teacher == null)return BadRequest("Teacher not found");
+
+            // Check if the teacher is associated with the repository of the assignment
+            var teacherRepository = _context.TeacherRepositories.FirstOrDefault(tr => tr.TeacherId == teacherId && tr.RepositoriesRepositoryId == assignment.RepositoryId);
+            if (teacherRepository == null)return BadRequest("Teacher is not associated with this repository");
+
+            // Update assignment details
+            assignment.Title = updatedAssignment.Title;
+            assignment.Description = updatedAssignment.Description;
+
+            _context.SaveChanges();
+
+            return Ok("Assignment updated successfully");
+        }
+
+        [HttpDelete("delete-assignment")]
+          public IActionResult DeleteAssignment([FromQuery] string assignmentId)
+          {
+              var assignment = _context.RepositoryAssigments.FirstOrDefault(a => a.AssignmentId == assignmentId);
+
+              if (assignment == null) return NotFound("Assignment not found");
+
+              _context.RepositoryAssigments.Remove(assignment);
+              _context.SaveChanges();
+
+              return Ok("Assignment deleted successfully");
+          }
+
+          // Endpoint for students to request access to a course
+          [HttpPost("request-access")]
+          public IActionResult RequestAccessToCourse([FromQuery] string courseId, [FromQuery] string studentId)
+          {
+              try
+              {
+                  // Check if course exists
+                  var course = _context.Repositories.FirstOrDefault(c => c.RepositoryId == courseId);
+                  if (course == null) return BadRequest("Course not found");
+
+                  // Check if student exists
+                  var student = _context.Students.FirstOrDefault(s => s.StudentId == studentId);
+                  if (student == null) return BadRequest("Student not found");
+
+                  // Check if student has already requested access to the course
+                  var existingRequest = _context.RepositoryAccessRequests.FirstOrDefault(r => r.CourseId == courseId && r.StudentId == studentId);
+                  if (existingRequest != null) return BadRequest("Access request already exists for this student and course");
+
+                  // Check if student has already added in course
+                  var existStudInRepositorium = _context.StudentRepositories.FirstOrDefault(r => r.RepositoriesRepositoryId == courseId && r.StudentId == studentId);
+                  if (existStudInRepositorium != null) return BadRequest("Student already exist in course");
+
+
+                  // Create new access request
+                  var accessRequest = new RepositoryAccessRequest
+                  {
+                      RepositoryAccessRequestId = Guid.NewGuid().ToString(),
+                      CourseId = courseId,
+                      StudentId = studentId,
+                      Course = course,
+                      Student = student,
+                      RequestTime = DateTime.UtcNow
+                  };
+
+                  _context.RepositoryAccessRequests.Add(accessRequest);
+                  _context.SaveChanges();
+
+                  return Ok("Access request submitted successfully");
+              }
+              catch (Exception ex)
+              {
+                  // Log the exception
+                  Console.WriteLine($"Error submitting access request: {ex.Message}");
+                  return StatusCode(500, "An error occurred while submitting access request");
+              }
+          }
+
+        //Endpoint for teachers to approve access requests for a course
+        [HttpPost("approve-access-student-course")]
+        public IActionResult ApproveAccessToCourse(/*[FromBody] StudentRepository model,*/[FromQuery] string requestId)
+        {
+            try
+            {
+                // Find the access request by requestId
+                var accessRequest = _context.RepositoryAccessRequests.FirstOrDefault(r => r.RepositoryAccessRequestId == requestId);
+                if (accessRequest == null)
+                {
+                    return BadRequest("Access request not found");
+                }
+                // Optionally, add more validation here (e.g., ensure teacher is authorized to approve, etc.)
+
+                // Remove the access request
+                _context.RepositoryAccessRequests.Remove(accessRequest);
+
+                // Add student to course
+                var studentCourse = new StudentRepository
+                {
+                    StudentRepositoryId = Guid.NewGuid().ToString(),
+                    RepositoriesRepositoryId = accessRequest.CourseId,  // Set the association with a specific course (repository)
+                    StudentId = accessRequest.StudentId,  // Set the student's identifier and associate them with this enrollment
+                    Repository = accessRequest.Course,  // Set a reference to the course (repository) object where the student is being enrolled
+                    Student = accessRequest.Student  // Set a reference to the student object being added to the course
+
+                    // IsAccepted = false // student needs approval from teacher
+                };
+
+                // Initialize StudentRepositories if null
+                /*  if (course.StudentRepositories == null)
+                  {
+                      course.StudentRepositories = new List<StudentRepository>();
+                  }
+
+                  if (student.StudentRepositories == null)
+                  {
+                      student.StudentRepositories = new List<StudentRepository>();
+                  }
+
+                  // Add the studentRepository to the collections
+                  course.StudentRepositories.Add(studentCourse);
+                  student.StudentRepositories.Add(studentCourse);*/
+
+
+                _context.StudentRepositories.Add(studentCourse);
+                _context.SaveChanges();
+
+                return Ok("Student added to course successfully");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Error approving access request: {ex.Message}");
+                return StatusCode(500, "An error occurred while approving access request");
+            }
+        }
     }
 
-    
 }
 
 

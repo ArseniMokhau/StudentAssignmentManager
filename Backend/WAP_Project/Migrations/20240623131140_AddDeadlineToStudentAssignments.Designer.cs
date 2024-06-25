@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WAP_Project.Models;
 
@@ -10,9 +11,11 @@ using WAP_Project.Models;
 namespace WAP_Project.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240623131140_AddDeadlineToStudentAssignments")]
+    partial class AddDeadlineToStudentAssignments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
@@ -144,17 +147,13 @@ namespace WAP_Project.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("RepositoryId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("StudentId")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("StudentRepositoryId");
 
-                    b.HasIndex("RepositoryId");
+                    b.HasIndex("RepositoriesRepositoryId");
 
                     b.HasIndex("StudentId");
 
@@ -285,7 +284,7 @@ namespace WAP_Project.Migrations
                 {
                     b.HasOne("WAP_Project.Models.Repository", "Repository")
                         .WithMany()
-                        .HasForeignKey("RepositoryId")
+                        .HasForeignKey("RepositoriesRepositoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

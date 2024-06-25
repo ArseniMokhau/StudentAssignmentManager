@@ -1,7 +1,11 @@
 {
   "Files": [
     {
-      "Id": "D:\\University\\webowe\\registerLast.26.05\\Backend\\WAP_Project\\wwwroot\\readme.txt",
+      "Id": "D:\\University\\webowe\\StudentAssignmentManager22.06\\Backend\\WAP_Project\\wwwroot\\Uploads\\cfc55265-87fc-4410-a5bd-24b16638e0d6.pdf",
+      "PackagePath": "staticwebassets\\Uploads\\cfc55265-87fc-4410-a5bd-24b16638e0d6.pdf"
+    },
+    {
+      "Id": "D:\\University\\webowe\\StudentAssignmentManager22.06\\Backend\\WAP_Project\\wwwroot\\readme.txt",
       "PackagePath": "staticwebassets\\readme.txt"
     },
     {

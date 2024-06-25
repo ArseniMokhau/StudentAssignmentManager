@@ -11,8 +11,8 @@ using WAP_Project.Models;
 namespace WAP_Project.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240617154531_UpdateInitialCreate")]
-    partial class UpdateInitialCreate
+    [Migration("20240622185122_StudentAssigmentsCreate")]
+    partial class StudentAssigmentsCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,12 +20,23 @@ namespace WAP_Project.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
 
-            modelBuilder.Entity("WAP_Project.Models.Assignment", b =>
+            modelBuilder.Entity("WAP_Project.Models.Repository", b =>
                 {
-                    b.Property<string>("AssignmentId")
+                    b.Property<string>("RepositoryId")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("Deadline")
+                    b.Property<string>("RepositoryName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("RepositoryId");
+
+                    b.ToTable("Repositories");
+                });
+
+            modelBuilder.Entity("WAP_Project.Models.RepositoryAssigments", b =>
+                {
+                    b.Property<string>("AssignmentId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
@@ -42,23 +53,7 @@ namespace WAP_Project.Migrations
 
                     b.HasKey("AssignmentId");
 
-                    b.HasIndex("RepositoryId");
-
-                    b.ToTable("Assignments");
-                });
-
-            modelBuilder.Entity("WAP_Project.Models.Repository", b =>
-                {
-                    b.Property<string>("RepositoryId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("RepositoryId");
-
-                    b.ToTable("Repositories");
+                    b.ToTable("RepositoryAssigments");
                 });
 
             modelBuilder.Entity("WAP_Project.Models.Student", b =>
@@ -83,16 +78,44 @@ namespace WAP_Project.Migrations
                     b.ToTable("Students");
                 });
 
-            modelBuilder.Entity("WAP_Project.Models.Submission", b =>
+            modelBuilder.Entity("WAP_Project.Models.StudentAssignments", b =>
                 {
-                    b.Property<string>("SubmissionId")
+                    b.Property<string>("StudentAssignmentId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("AssignmentId")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("FilePath")
+                    b.Property<DateTime>("Deadline")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RepositoryAssigmentsAssignmentId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("StudentAssignmentId");
+
+                    b.HasIndex("RepositoryAssigmentsAssignmentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("studentAssigments");
+                });
+
+            modelBuilder.Entity("WAP_Project.Models.StudentRepository", b =>
+                {
+                    b.Property<string>("StudentRepositoryId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RepositoriesRepositoryId")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -100,16 +123,13 @@ namespace WAP_Project.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("SubmittedAt")
-                        .HasColumnType("TEXT");
+                    b.HasKey("StudentRepositoryId");
 
-                    b.HasKey("SubmissionId");
-
-                    b.HasIndex("AssignmentId");
+                    b.HasIndex("RepositoriesRepositoryId");
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Submissions");
+                    b.ToTable("StudentRepositories");
                 });
 
             modelBuilder.Entity("WAP_Project.Models.Teacher", b =>
@@ -136,15 +156,22 @@ namespace WAP_Project.Migrations
 
             modelBuilder.Entity("WAP_Project.Models.TeacherRepository", b =>
                 {
+                    b.Property<string>("TeacherRepositoryId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RepositoriesRepositoryId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("TeacherId")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("RepositoryId")
-                        .HasColumnType("TEXT");
+                    b.HasKey("TeacherRepositoryId");
 
-                    b.HasKey("TeacherId", "RepositoryId");
+                    b.HasIndex("RepositoriesRepositoryId");
 
-                    b.HasIndex("RepositoryId");
+                    b.HasIndex("TeacherId");
 
                     b.ToTable("TeacherRepositories");
                 });
@@ -189,75 +216,64 @@ namespace WAP_Project.Migrations
                     b.ToTable("UserTokens");
                 });
 
-            modelBuilder.Entity("WAP_Project.Models.Assignment", b =>
+            modelBuilder.Entity("WAP_Project.Models.StudentAssignments", b =>
                 {
-                    b.HasOne("WAP_Project.Models.Repository", "Repository")
-                        .WithMany("Assignments")
-                        .HasForeignKey("RepositoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Repository");
-                });
-
-            modelBuilder.Entity("WAP_Project.Models.Submission", b =>
-                {
-                    b.HasOne("WAP_Project.Models.Assignment", "Assignment")
-                        .WithMany("Submissions")
-                        .HasForeignKey("AssignmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("WAP_Project.Models.RepositoryAssigments", "RepositoryAssigments")
+                        .WithMany()
+                        .HasForeignKey("RepositoryAssigmentsAssignmentId");
 
                     b.HasOne("WAP_Project.Models.Student", "Student")
-                        .WithMany("Submissions")
+                        .WithMany()
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Assignment");
+                    b.Navigation("RepositoryAssigments");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("WAP_Project.Models.StudentRepository", b =>
+                {
+                    b.HasOne("WAP_Project.Models.Repository", "Repository")
+                        .WithMany()
+                        .HasForeignKey("RepositoriesRepositoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WAP_Project.Models.Student", "Student")
+                        .WithMany("StudentRepositories")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Repository");
 
                     b.Navigation("Student");
                 });
 
             modelBuilder.Entity("WAP_Project.Models.TeacherRepository", b =>
                 {
-                    b.HasOne("WAP_Project.Models.Repository", "Repository")
-                        .WithMany("TeacherRepositories")
-                        .HasForeignKey("RepositoryId")
+                    b.HasOne("WAP_Project.Models.Repository", "Repositories")
+                        .WithMany()
+                        .HasForeignKey("RepositoriesRepositoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WAP_Project.Models.Teacher", "Teacher")
-                        .WithMany("TeacherRepositories")
+                    b.HasOne("WAP_Project.Models.Teacher", "Teachers")
+                        .WithMany()
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Repository");
+                    b.Navigation("Repositories");
 
-                    b.Navigation("Teacher");
-                });
-
-            modelBuilder.Entity("WAP_Project.Models.Assignment", b =>
-                {
-                    b.Navigation("Submissions");
-                });
-
-            modelBuilder.Entity("WAP_Project.Models.Repository", b =>
-                {
-                    b.Navigation("Assignments");
-
-                    b.Navigation("TeacherRepositories");
+                    b.Navigation("Teachers");
                 });
 
             modelBuilder.Entity("WAP_Project.Models.Student", b =>
                 {
-                    b.Navigation("Submissions");
-                });
-
-            modelBuilder.Entity("WAP_Project.Models.Teacher", b =>
-                {
-                    b.Navigation("TeacherRepositories");
+                    b.Navigation("StudentRepositories");
                 });
 #pragma warning restore 612, 618
         }
