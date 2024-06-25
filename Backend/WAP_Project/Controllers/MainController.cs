@@ -165,20 +165,29 @@ namespace WAP_Project.Controllers
             return Ok(new { UploadedFiles = uploadedFileInfos });
         }
 
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
            // Endpoint for students to upload files for assignments
           [HttpPost("upload-assignment-file")]
-         public IActionResult UploadAssignmentFile([FromQuery] string assignmentId, /* List<IFormFile> files,*/ [FromQuery] string studentId)
+         public IActionResult UploadAssignmentFile([FromQuery] string assignmentId,  List<IFormFile> files, [FromQuery] string studentId)
           {
-            //связано с ключем в таблице StudentAssignments(+ проебалась и не заметила как в таблице создала  RepositoryAssigments (без n)
-
             var assignment = _context.RepositoryAssigments.FirstOrDefault(a => a.AssignmentId == assignmentId);
               if (assignment == null) return BadRequest("Assignment not found");
-            //if student exist at this repo
 
+            var repository = _context.Repositories.FirstOrDefault(r => r.RepositoryId == assignment.RepositoryId);
+            if (repository == null) return BadRequest("repository not found");
+            //if student exist at this repo
 
             // Check if the student  exists
             var student = _context.Students.FirstOrDefault(s => s.StudentId == studentId);
             if (student == null) return BadRequest("Student not found");
+
+            // Check if token exists for the student
+            var userToken = _context.UserTokens.FirstOrDefault(t => t.UserId == studentId);
+            if (userToken == null)return Unauthorized("Token not found for the student");
+
+       /*    // Check if the student is associated with the repository
+            var studentRepository = _context.StudentRepositories.FirstOrDefault(st => st.StudentId == studentId && st.RepositoriesRepositoryId == assignment.Repositories.RepositoryId);
+            if (studentRepository == null) return BadRequest("Student is not part of the repository");*/
 
             // Create a student assignment record
             var StudentAssignment = new StudentAssignments
@@ -197,34 +206,35 @@ namespace WAP_Project.Controllers
             _context.studentAssignments.Add(StudentAssignment);
             _context.SaveChanges();
 
-            return Ok("Course created successfully");
-            /*   var uploadsDirectory = Path.Combine(_environment.WebRootPath, "Assignments", assignmentId, studentId);
+           // return Ok("Course created successfully");
+            var uploadsDirectory = Path.Combine(_environment.WebRootPath, "Assignments", assignmentId, studentId);
 
-                 if (!Directory.Exists(uploadsDirectory))
-                 {
-                     Directory.CreateDirectory(uploadsDirectory);
-                 }
+            if (!Directory.Exists(uploadsDirectory))
+            {
+                Directory.CreateDirectory(uploadsDirectory);
+            }
 
-                 var uploadedFileInfos = new List<string>();
+            var uploadedFileInfos = new List<string>();
 
-                 foreach (var file in files)
-                 {
-                     if (file.Length > 0)
-                     {
-                         var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                         var filePath = Path.Combine(uploadsDirectory, fileName);
+            foreach (var file in files)
+            {
+                if (file.Length > 0)
+                {
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    var filePath = Path.Combine(uploadsDirectory, fileName);
 
-                         using (var stream = new FileStream(filePath, FileMode.Create))
-                         {
-                             file.CopyTo(stream);
-                         }
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        file.CopyTo(stream);
+                    }
 
-                         uploadedFileInfos.Add(filePath);
-                     }
-                 }
+                    uploadedFileInfos.Add(filePath);
+                }
+            }
 
-                 return Ok(new { UploadedFiles = uploadedFileInfos });*/
+            return Ok(new { UploadedFiles = uploadedFileInfos, assignmentId, studentId, StudentAssignment.SubmissionDate });
         }
+
         // Endpoint for downloading files
         [HttpGet("download/{fileName}")]
 
@@ -255,13 +265,13 @@ namespace WAP_Project.Controllers
             if (existingToken != null)
             {
                 // Token already exists, return it
-                return Ok(new { Token = existingToken.Token, Role = role });
+                return Ok(new { Token = existingToken.Token, Role = role, UserId = username });
             }
 
             // Create JWT token
             var token = GenerateJwtToken(username, role);
             AddTokenToDatabase(username, token);
-            return Ok(new { Token = token, Role = role });
+            return Ok(new { Token = token, Role = role, UserId = username });
         }
 
         private void AddTokenToDatabase(string userId, string token)
@@ -429,7 +439,7 @@ namespace WAP_Project.Controllers
           }
 
         [HttpGet("all-assignments")]
-        public ActionResult<IEnumerable<Repository>> GetAssignments()
+        public ActionResult<IEnumerable<Repository>> GetAssignments()//ZADANIA OD KAZDOGO REPOSITORIA DURA BLYA
         {
             var assignments = _context.RepositoryAssigments.ToList();
             return Ok(assignments);

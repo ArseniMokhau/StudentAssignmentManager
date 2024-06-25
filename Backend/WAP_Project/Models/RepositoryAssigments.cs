@@ -11,8 +11,8 @@ namespace WAP_Project.Models
         public string Title { get; set; }
         public string Description { get; set; }
 
-    /*    [ForeignKey("RepositoryId")]
-        public Repository Repositories { get; set; }*/
+        [ForeignKey("RepositoryId")]
+        public Repository Repositories { get; set; }
 
     }
 }

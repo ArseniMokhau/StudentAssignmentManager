@@ -16,7 +16,7 @@ namespace WAP_Project.Models
         public DateTime Deadline { get; set; }
         public DateTime SubmissionDate { get; set; }
 
-        [ForeignKey("AssignmentId")]
+        [ForeignKey("RepositoryAssigments")]
         public string AssignmentId { get; set; }
         public RepositoryAssigments RepositoryAssigments { get; set; }
 
