@@ -12,6 +12,7 @@ using WAP_Project.Models;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Hosting;
 using System.Data;
+using System.IO.Compression;
 
 namespace WAP_Project.Controllers
 {
@@ -456,13 +457,13 @@ namespace WAP_Project.Controllers
         }
 
         [HttpGet("teacher-get all sended assignments")]
-        public IActionResult GetAssignmentFiles([FromQuery] string assignmentId, [FromQuery] string teacherId)
+        public IActionResult GetAssignmentFiles([FromQuery] string assignmentId, [FromQuery] string teacherToken)
         {
             try
 
             {
                 // Find the teacher by token
-                var teacherTokenObj = _context.UserTokens.FirstOrDefault(t => t.UserId == teacherId);
+                var teacherTokenObj = _context.UserTokens.FirstOrDefault(t => t.Token == teacherToken);
                 if (teacherTokenObj == null) return Unauthorized("Invalid token");
 
                 // Find the teacher by teacherId
@@ -486,6 +487,7 @@ namespace WAP_Project.Controllers
                     .Include(sa => sa.Student)
                     .Where(sa => sa.AssignmentId == assignmentId)
                     .ToList();
+
 
                 var uploadedFiles = new List<object>();
 
@@ -525,9 +527,115 @@ namespace WAP_Project.Controllers
         }
 
 
-     /*   // Endpoint for downloading student assignment files
-        [HttpGet("download-assignment-file")]
-        public IActionResult DownloadAssignmentFile([FromQuery] string assignmentId, [FromQuery] string teacherId, [FromQuery] string fileName)
+        /*  // Endpoint for downloading student assignment files
+          [HttpGet("download-assignment-file")]
+          public IActionResult DownloadAssignmentFile([FromQuery] string assignmentId, [FromQuery] string teacherId, [FromQuery] string fileName)
+          {
+              try
+              {
+                  // Find the assignment by assignmentId
+                  var assignment = _context.RepositoryAssigments.FirstOrDefault(a => a.AssignmentId == assignmentId);
+                  if (assignment == null)
+                  {
+                      return NotFound("Assignment not found");
+                  }
+
+                  // Check if the teacher is associated with the repository (course)
+                  var teacherRepository = _context.TeacherRepositories
+                      .FirstOrDefault(tr => tr.RepositoriesRepositoryId == assignment.RepositoryId && tr.TeacherId == teacherId);
+                  if (teacherRepository == null)
+                  {
+                      return Unauthorized("Teacher is not associated with this repository (course)");
+                  }
+                  // Find all student assignments for the given assignmentId
+                  var studentAssignments = _context.studentAssignments.Where(sa => sa.AssignmentId == assignmentId).ToList();
+                  if (studentAssignments == null || studentAssignments.Count == 0)
+                  {
+                      return NotFound("No student assignments found for this assignment");
+                  }
+
+                  // Prepare a list to store memory streams of all files
+                  var fileStreams = new List<MemoryStream>();
+
+                  foreach (var studentAssignment in studentAssignments)
+                  {
+                      // Construct the file path for each student
+                      var uploadsDirectory = Path.Combine(_environment.WebRootPath, "Assignments", assignmentId, studentAssignment.StudentId);
+                      var filePath = Path.Combine(uploadsDirectory, fileName);
+
+                      // Check if the file exists
+                      if (System.IO.File.Exists(filePath))
+                      {
+                          // Read the file into a memory stream
+                          var memory = new MemoryStream();
+                          using (var stream = new FileStream(filePath, FileMode.Open))
+                          {
+                              stream.CopyTo(memory);
+                          }
+                          memory.Position = 0;
+
+                          // Add the memory stream to the list
+                          fileStreams.Add(memory);
+                      }
+                      else
+                      {
+                          // Optionally handle the case where a file might be missing for a student
+                          // You can skip the student or log an error here
+                          Console.WriteLine($"File not found for student: {studentAssignment.StudentId}");
+                      }
+                  }
+
+                  // Combine all memory streams into a single zip file
+                  var archiveStream = new MemoryStream();
+                  using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, true))
+                  {
+                      foreach (var memoryStream in fileStreams)
+                      {
+                          var entry = archive.CreateEntry(fileName, CompressionLevel.Fastest);
+                          using (var entryStream = entry.Open())
+                          {
+                              memoryStream.CopyTo(entryStream);
+                          }
+                      }
+                  }
+                  archiveStream.Position = 0;
+
+                  // Return the zip file as a downloadable attachment
+                  return File(archiveStream, "application/zip", $"{assignmentId}_files.zip");
+
+
+                  *//*  // Construct the file path
+                    var uploadsDirectory = Path.Combine(_environment.WebRootPath, "Assignments", assignmentId, StudentAssignments.StudentId);
+                    var filePath = Path.Combine(uploadsDirectory, fileName);
+
+                    // Check if the file exists
+                    if (!System.IO.File.Exists(filePath))
+                    {
+                        return NotFound("File not found");
+                    }
+
+                    // Read the file into a memory stream
+                    var memory = new MemoryStream();
+                    using (var stream = new FileStream(filePath, FileMode.Open))
+                    {
+                        stream.CopyTo(memory);
+                    }
+                    memory.Position = 0;
+
+                    // Return the file as a downloadable attachment
+                    return File(memory, "application/octet-stream", fileName);
+              *//*
+              }
+              catch (Exception ex)
+              {
+                  // Log the exception
+                  Console.WriteLine($"Error downloading assignment file: {ex.Message}");
+                  return StatusCode(500, "An error occurred while downloading assignment file");
+              }
+          }*/
+
+        [HttpGet("download-assignment-files")]
+        public IActionResult DownloadAssignmentFiles([FromQuery] string assignmentId, [FromQuery] string teacherId)
         {
             try
             {
@@ -546,35 +654,72 @@ namespace WAP_Project.Controllers
                     return Unauthorized("Teacher is not associated with this repository (course)");
                 }
 
-                // Construct the file path
-                var uploadsDirectory = Path.Combine(_environment.WebRootPath, "Assignments", assignmentId);
-                var filePath = Path.Combine(uploadsDirectory, fileName);
-
-                // Check if the file exists
-                if (!System.IO.File.Exists(filePath))
+                // Find all student assignments for the given assignmentId
+                var studentAssignments = _context.studentAssignments.Where(sa => sa.AssignmentId == assignmentId).ToList();
+                if (studentAssignments == null || studentAssignments.Count == 0)
                 {
-                    return NotFound("File not found");
+                    return NotFound("No student assignments found for this assignment");
                 }
 
-                // Read the file into a memory stream
-                var memory = new MemoryStream();
-                using (var stream = new FileStream(filePath, FileMode.Open))
-                {
-                    stream.CopyTo(memory);
-                }
-                memory.Position = 0;
+                // Prepare a list to store memory streams of all files
+                var fileStreams = new List<MemoryStream>();
 
-                // Return the file as a downloadable attachment
-                return File(memory, "application/octet-stream", fileName);
+                foreach (var studentAssignment in studentAssignments)
+                {
+                    // Construct the directory path for each student
+                    var uploadsDirectory = Path.Combine(_environment.WebRootPath, "Assignments", assignmentId, studentAssignment.StudentId);
+
+                    // Check if the directory exists
+                    if (Directory.Exists(uploadsDirectory))
+                    {
+                        // Get all files in the directory
+                        var files = Directory.GetFiles(uploadsDirectory);
+
+                        foreach (var filePath in files)
+                        {
+                            var fileName = Path.GetFileName(filePath);
+
+                            // Read the file into a memory stream
+                            var memory = new MemoryStream();
+                            using (var stream = new FileStream(filePath, FileMode.Open))
+                            {
+                                stream.CopyTo(memory);
+                            }
+                            memory.Position = 0;
+
+                            // Add the memory stream to the list
+                            fileStreams.Add(memory);
+                        }
+                    }
+                }
+
+                // Combine all memory streams into a single zip file
+                var archiveStream = new MemoryStream();
+                using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, true))
+                {
+                    foreach (var memoryStream in fileStreams)
+                    {
+                        var entry = archive.CreateEntry(Guid.NewGuid().ToString() + ".bin", CompressionLevel.Fastest);
+                        using (var entryStream = entry.Open())
+                        {
+                            memoryStream.CopyTo(entryStream);
+                        }
+                    }
+                }
+                archiveStream.Position = 0;
+
+                // Return the zip file as a downloadable attachment
+                return File(archiveStream, "application/zip", $"{assignmentId}_student_answers.zip");
             }
             catch (Exception ex)
             {
                 // Log the exception
-                Console.WriteLine($"Error downloading assignment file: {ex.Message}");
-                return StatusCode(500, "An error occurred while downloading assignment file");
+                Console.WriteLine($"Error downloading assignment files: {ex.Message}");
+                return StatusCode(500, "An error occurred while downloading assignment files");
             }
         }
-*/
+
+
         /* [HttpGet("get all assignments from student repo ")]
          public IActionResult GetAssignmentFiles([FromQuery] string assignmentId)
          {

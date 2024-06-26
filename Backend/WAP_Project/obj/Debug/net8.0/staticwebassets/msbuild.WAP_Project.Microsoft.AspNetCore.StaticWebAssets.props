@@ -32,6 +32,22 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\Assignments\42555049-aa8e-4f24-9384-4a1208569499\74415ff4-7496-4386-b035-9ef95c8b2ab7\74b3d5e8-380a-4aaf-9372-5b6696f69fe5.pdf))</OriginalItemSpec>
     </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\Assignments\e3a98289-e313-4742-a06a-31dbc2d5366d\2798aae3-2325-4194-a881-d3beb80c5ab5\070df20e-e2e8-4ebf-93d7-e7e9ab6a417f.txt))">
+      <SourceType>Package</SourceType>
+      <SourceId>WAP_Project</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/WAP_Project</BasePath>
+      <RelativePath>Assignments/e3a98289-e313-4742-a06a-31dbc2d5366d/2798aae3-2325-4194-a881-d3beb80c5ab5/070df20e-e2e8-4ebf-93d7-e7e9ab6a417f.txt</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\Assignments\e3a98289-e313-4742-a06a-31dbc2d5366d\2798aae3-2325-4194-a881-d3beb80c5ab5\070df20e-e2e8-4ebf-93d7-e7e9ab6a417f.txt))</OriginalItemSpec>
+    </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\Assignments\e3a98289-e313-4742-a06a-31dbc2d5366d\2798aae3-2325-4194-a881-d3beb80c5ab5\8120dbc9-b09e-42f0-97db-4d73de528c72.pdf))">
       <SourceType>Package</SourceType>
       <SourceId>WAP_Project</SourceId>
