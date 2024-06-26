@@ -4,23 +4,9 @@ import { Assignment } from './Assignment';
 import './CourseDetails.css';
 import { AuthContext } from '../auth/AuthContext';
 
-// Placeholder assignments data
-const placeholderAssignments = [
-  { id: 1, courseId: 1, title: 'Assignment 1', description: 'Description 1', deadline: '2024-07-01' },
-  { id: 2, courseId: 1, title: 'Assignment 2', description: 'Description 2', deadline: '2024-07-10' },
-  { id: 3, courseId: 2, title: 'Assignment 3', description: 'Description 3', deadline: '2024-07-15' },
-];
-
-// Placeholder course details
-const placeholderCourse = {
-  id: 1,
-  name: 'Course Name',
-  description: 'Course Description',
-};
-
 export const CourseDetails = () => {
   const { id } = useParams();
-  const { role } = useContext(AuthContext); // Access role from context
+  const { token, role, uid } = useContext(AuthContext);
   const [course, setCourse] = useState(null);
   const [assignments, setAssignments] = useState([]);
   const [newAssignment, setNewAssignment] = useState({
@@ -28,9 +14,10 @@ export const CourseDetails = () => {
     description: '',
     deadline: '',
   });
-  const [isEnrolled, setIsEnrolled] = useState(false);
-  const [isCurating, setIsCurating] = useState(false);
-  const [isEditing, setIsEditing] = useState(false); // Flag for editing mode
+  const [isEnrolled, setIsEnrolled] = useState('');
+  const [isCurating, setIsCurating] = useState('');
+  const [hasApplied, setHasApplied] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
   const [deletionSuccess, setDeletionSuccess] = useState(false);
   const [editedCourse, setEditedCourse] = useState({
     name: '',
@@ -38,28 +25,102 @@ export const CourseDetails = () => {
   });
 
   useEffect(() => {
-    // Simulate fetching course details by id
-    setCourse(placeholderCourse);
-
-    // Fetch assignments for the course with id
-    const courseAssignments = placeholderAssignments.filter(
-      assignment => assignment.courseId === parseInt(id)
-    );
-    setAssignments(courseAssignments);
-
-    // Placeholder checks for enrollment and curation
+    fetchCourse();
+    fetchAssignments();
     checkEnrollment();
     checkCuration();
-  }, [id]);
+  }, [id, isCurating, isEditing]);
 
-  const checkEnrollment = () => {
-    // Placeholder function to simulate checking enrollment
-    setIsEnrolled(false);
+  const fetchCourse = async () => {
+    try {
+      const response = await fetch(`/auth/repository-info?repositoryId=${id}`, {
+        method: 'GET',
+        headers: {
+          'accept': 'text/plain',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch course details');
+      }
+
+      const data = await response.json();
+      const fetchedCourse = {
+        id: id,
+        name: data.repositoryName,
+        description: data.description,
+      };
+
+      setCourse(fetchedCourse);
+    } catch (error) {
+      console.error('Error fetching course details:', error.message);
+    }
   };
 
-  const checkCuration = () => {
-    // Placeholder function to simulate checking curation
-    setIsCurating(false);
+  const fetchAssignments = async () => {
+    try {
+      const response = await fetch(`/auth/all-assignments-by-repository?repositoryId=${id}`, {
+        method: 'GET',
+        headers: {
+          'accept': 'text/plain',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch assignments');
+      }
+
+      const data = await response.json();
+      const formattedAssignments = data.map(assignment => ({
+        id: assignment.assignmentId,
+        title: assignment.title,
+        description: assignment.description,
+        deadline: assignment.deadline,
+      }));
+      setAssignments(formattedAssignments);
+    } catch (error) {
+      console.error('Error fetching assignments:', error.message);
+    }
+  };
+
+  const checkEnrollment = async () => {
+    try {
+      const response = await fetch(`/auth/is-student-enrolled?courseId=${id}&studentId=${uid}`, {
+        method: 'GET',
+        headers: {
+          'accept': '*/*',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check enrollment status');
+      }
+
+      const isAssociated = await response.json();
+      setIsEnrolled(isAssociated);
+    } catch (error) {
+      console.error('Error checking enrollment status:', error.message);
+    }
+  };
+
+  const checkCuration = async () => {
+    try {
+      const response = await fetch(`/auth/is-teacher-associated?courseId=${id}&teacherId=${uid}`, {
+        method: 'GET',
+        headers: {
+          'accept': '*/*',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check curation status');
+      }
+
+      const isAssociated = await response.json();
+      setIsCurating(isAssociated);
+    } catch (error) {
+      console.error('Error checking curation status:', error.message);
+    }
   };
 
   const handleNewAssignmentChange = (e) => {
@@ -67,19 +128,56 @@ export const CourseDetails = () => {
     setNewAssignment({ ...newAssignment, [name]: value });
   };
 
-  const handleCreateAssignment = (e) => {
+  const handleCreateAssignment = async (e) => {
     e.preventDefault();
-    const newAssignmentWithId = {
-      ...newAssignment,
-      id: assignments.length + 1,
-      courseId: parseInt(id),
-    };
-    setAssignments([...assignments, newAssignmentWithId]);
-    setNewAssignment({ title: '', description: '', deadline: '' });
+    try {
+      const response = await fetch(`/auth/create-assignment?teacherId=${uid}&repositoryId=${id}&title=${newAssignment.title}&description=${newAssignment.description}&deadline=${newAssignment.deadline}`, {
+        method: 'POST',
+        headers: {
+          'accept': '*/*',
+        },
+        body: JSON.stringify(newAssignment)
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.text();
+      console.log('Assignment created successfully', data);
+
+      // Re-fetch assignments after creating a new one
+      fetchAssignments();
+
+      setNewAssignment({ title: '', description: '', deadline: '' });
+    } catch (error) {
+      console.error('Assignment creation failed:', error.message);
+    }
   };
 
-  const handleDeleteAssignment = (assignmentId) => {
-    setAssignments(assignments.filter(assignment => assignment.id !== assignmentId));
+  const handleDeleteAssignment = async (assignmentId) => {
+    try {
+      const response = await fetch(`/auth/delete-assignment?assignmentId=${assignmentId}`, {
+        method: 'DELETE',
+        headers: {
+          'accept': '*/*',
+        },
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.text();
+      console.log('Assignment deleted successfully', data);
+
+    } catch (error) {
+      console.error('Assignment deletion failed:', error.message);
+    }
+
+    fetchAssignments();
   };
 
   const handleEditCourse = () => {
@@ -91,7 +189,6 @@ export const CourseDetails = () => {
   };
 
   const handleSaveEdit = () => {
-    // Simulate sending edit request to server
     setCourse({
       ...course,
       name: editedCourse.name,
@@ -104,17 +201,61 @@ export const CourseDetails = () => {
     setIsEditing(false);
   };
 
-  const handleDeleteCourse = () => {
+  const handleDeleteCourse = async () => {
+    try {
+      const response = await fetch(`/auth/delete-repository?repositoryId=${id}`, {
+        method: 'DELETE',
+        headers: {
+          'accept': '*/*',
+        },
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.text();
+      console.log('Course deleted successfully', data);
+      
+      setDeletionSuccess(true);
+
+    } catch (error) {
+      console.error('Course deletion failed:', error.message);
+    }
+    
     setIsEditing(false);
-    setDeletionSuccess(true);
   };
 
-  const requestEnrollment = () => {
-    setIsEnrolled(true)
+  const requestEnrollment = async () => {
+    try {
+      const response = await fetch(`/auth/request-access?courseId=${id}&studentId=${uid}`, {
+        method: 'POST',
+        headers: {
+          'accept': '*/*',
+        },
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.text();
+      console.log('Applied successfuly: ', data);
+
+    } catch (error) {
+      console.error('Could not apply to the course:', error.message);
+    }
+
+    setHasApplied(true);
+    checkEnrollment();
+
+    // setIsEnrolled(true);
   };
 
   const requestCuration = () => {
-    setIsCurating(true)
+    setIsCurating(true);
   };
 
   const handleInputChange = (event) => {
@@ -174,11 +315,11 @@ export const CourseDetails = () => {
           </button>
           <button className="delete-button" onClick={handleDeleteCourse}>
             Delete Course
-        </button>
+          </button>
         </div>
       )}
 
-      {role === 'student' && !isEnrolled && (
+      {role === 'student' && !isEnrolled && !hasApplied &&(
         <button className="enroll-button" onClick={requestEnrollment}>
           Enroll
         </button>
@@ -237,6 +378,7 @@ export const CourseDetails = () => {
                 rows="5"
               />
             </div>
+            {/*
             <div className="form-group">
               <label htmlFor="deadline">Deadline:</label>
               <input
@@ -248,6 +390,7 @@ export const CourseDetails = () => {
                 required
               />
             </div>
+            */}
             <button type="submit">Create Assignment</button>
           </form>
         </div>

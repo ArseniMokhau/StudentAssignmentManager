@@ -3,28 +3,15 @@ import { useParams, Link, Navigate } from 'react-router-dom';
 import './AssignmentDetails.css';
 import { AuthContext } from '../auth/AuthContext';
 
-// Placeholder assignment details
-const placeholderAssignment = {
-  id: 1,
-  title: 'Assignment Title',
-  description: 'Assignment Description',
-  deadline: '2024-07-01',
-};
-
-// Placeholder student submissions
-const placeholderSubmissions = [
-  { id: 1, assignmentId: 1, studentId: 101, fileName: 'file1.pdf', date: '2024-06-20' },
-  { id: 2, assignmentId: 1, studentId: 102, fileName: 'file2.pdf', date: '2024-06-21' },
-];
-
 export const AssignmentDetails = () => {
   const { id } = useParams();
-  const { role } = useContext(AuthContext);
+  const { role, uid } = useContext(AuthContext);
   const [assignment, setAssignment] = useState(null);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [assignmentStatus, setAssignmentStatus] = useState('Not Submitted');
   const [submissions, setSubmissions] = useState([]);
+  const [topSubmission, setTopSubmission] = useState('');
   const [isPastDeadline, setIsPastDeadline] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [isCurating, setIsCurating] = useState(false);
@@ -37,16 +24,17 @@ export const AssignmentDetails = () => {
   });
 
   useEffect(() => {
-    // Placeholder fetch assignment details by id
-    setAssignment(placeholderAssignment);
+
+    fetchAssignmentDetails();
 
     // Check if the current date is past the deadline
+    /*
     const currentDate = new Date();
     const assignmentDeadline = new Date(placeholderAssignment.deadline);
     if (currentDate > assignmentDeadline) {
       setIsPastDeadline(true);
     }
-
+    */
     // Check enrollment or curation status
     if (role === 'student') {
       checkEnrollment();
@@ -59,6 +47,33 @@ export const AssignmentDetails = () => {
     }
   }, [id, role]);
 
+  const fetchAssignmentDetails = async () => {
+    try {
+      const response = await fetch(`/auth/assignment-info?assignmentId=${id}`, {
+        method: 'GET',
+        headers: {
+          'accept': 'text/plain',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch assignment details');
+      }
+
+      const data = await response.json();
+
+      const placeholderAssignment = {
+        id: id,
+        name: data.title,
+        description: data.description,
+      };
+
+      setAssignment(placeholderAssignment);
+    } catch (error) {
+      console.error('Error fetching assignment details:', error.message);
+    }
+  };
+
   const checkEnrollment = () => {
     // Placeholder function to simulate checking enrollment
     setIsEnrolled(true);
@@ -69,17 +84,74 @@ export const AssignmentDetails = () => {
     setIsCurating(true);
   };
 
-  const fetchAssignmentStatusFromBackend = (assignmentId) => {
-    setTimeout(() => {
-      const fetchedAssignmentStatus = 'Not Submitted';
-      setAssignmentStatus(fetchedAssignmentStatus);
-    }, 1000);
+  const fetchAssignmentStatusFromBackend = async (assignmentId) => {
+    try {
+      const response = await fetch(`/auth/student-get-sended-assignments?assignmentId=${id}&studentId=${uid}`, {
+        method: 'GET',
+        headers: {
+          'accept': '*/*',
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch assignment status');
+      }
+  
+      const data = await response.json();
+
+      if (data.length > 0) {
+        const formattedTopSubmission = {
+          studentId: data[0].studentId,
+          studentName: data[0].studentName,
+          fileName: data[0].fileName,
+          path: data[0].path,
+          submissionDate: data[0].submissionDate,
+        };
+
+        setAssignmentStatus('Submitted');
+  
+        // Save the top submission to state
+        setTopSubmission(formattedTopSubmission);
+      } else {
+        setAssignmentStatus('Not Submitted');
+
+        // Handle case where no submissions are returned
+        console.warn('No submissions found');
+      }
+  
+    } catch (error) {
+      console.error('Error fetching assignment status:', error.message);
+    }
   };
 
-  const fetchSubmissionsFromBackend = (assignmentId) => {
-    setTimeout(() => {
-      setSubmissions(placeholderSubmissions);
-    }, 1000);
+  const fetchSubmissionsFromBackend = async (assignmentId) => {
+    try {
+      const response = await fetch(`/auth/teacher-get all sended assignments?assignmentId=${id}&teacherId=${uid}`, {
+        method: 'GET',
+        headers: {
+          'accept': 'text/plain',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch submissions');
+      }
+
+      const data = await response.json();
+
+      const formattedSubmissions = data.map(submission => ({
+        studentId: submission.studentId,
+        studentName: submission.studentName,
+        fileName: submission.fileName,
+        path: submission.path,
+        submissionDate: submission.submissionDate,
+      }));
+
+      setSubmissions(formattedSubmissions);
+
+    } catch (error) {
+      console.error('Error fetching submissions:', error.message);
+    }
   };
 
   const handleFileChange = (event) => {
@@ -87,48 +159,140 @@ export const AssignmentDetails = () => {
     setSelectedFiles(files);
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setAssignmentStatus('Submitted');
-    setSubmissionStatus('Success');
-  };
+  const handleSubmit = async () => {
 
-  const handleDownload = (fileName) => {
-    console.log(`Downloading file: ${fileName}`);
+    const formData = new FormData();
+    selectedFiles.forEach(file => {
+      formData.append('files', file, file.name);
+    });
+  
+    try {
+      const response = await fetch(`/auth/upload-assignment-file?assignmentId=${id}&studentId=${uid}`, {
+        method: 'POST',
+        headers: {
+          'accept': '*/*',
+        },
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to upload files');
+      }
+  
+      const data = await response.json();
+      console.log('Files uploaded successfully');
+      // Handle success, update UI if needed
+    } catch (error) {
+      console.error('File upload failed:', error.message);
+      // Handle error, show error message to user
+    }
+
+    fetchAssignmentStatusFromBackend(id);
+  };
+  
+
+  const handleDownload = async (path, fileName) => {
+    const completePath = `${path}\\${fileName}`;
+    const encodedPath = encodeURIComponent(completePath);
+    
+    try {
+      const response = await fetch(`/auth/download/${encodedPath}`, {
+        method: 'GET',
+        headers: {
+          'accept': '*/*',
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to download file');
+      }
+  
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error downloading file:', error.message);
+    }
   };
 
   const handleEdit = () => {
     setIsEditing(true);
     setEditedAssignment({
-      title: assignment.title,
+      title: assignment.name,
       description: assignment.description,
-      deadline: assignment.deadline,
+      // deadline: assignment.deadline,
     });
   };
 
-  const handleSaveEdit = () => {
-    // Simulate sending edit request to server
-    setAssignment({
-      ...assignment,
-      title: editedAssignment.title,
-      description: editedAssignment.description,
-      deadline: editedAssignment.deadline,
-    });
+  const handleSaveEdit = async () => {
+    try {
+      const response = await fetch(`/auth/update-assignment?assignmentId=${id}&title=${editedAssignment.title}&description=${editedAssignment.description}&teacherId=${uid}`, {
+        method: 'PUT',
+        headers: {
+          'accept': '/',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update assignment');
+      }
+
+      const data = await response.text();
+
+      console.log(data);
+
+      setSubmissions(formattedSubmissions);
+
+    } catch (error) {
+      console.error('Error updating assignment:', error.message);
+    }
+
     setIsEditing(false);
+
+    fetchAssignmentDetails();
   };
 
   const handleCancelEdit = () => {
     setIsEditing(false);
   };
 
-  const handleDeleteAssignment = () => {
+  const handleDeleteAssignment = async () => {
     setIsEditing(false);
-    // Simulate deletion process
-    setTimeout(() => {
-      // Assuming deletion was successful
-      navigate(-1); // Navigate back to previous page in history stack
-    }, 1000);
+    
+    try {
+      const response = await fetch(`/auth/delete-assignment?assignmentId=${id}`, {
+        method: 'DELETE',
+        headers: {
+          'accept': '*/*',
+        },
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.text();
+      console.log('Assignment deleted successfully', data);
+
+      setDeletionSuccess(true);
+
+    } catch (error) {
+      console.error('Assignment deletion failed:', error.message);
+    }
   };
+
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-UK', options).format(date);
+  };
+  
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -139,7 +303,7 @@ export const AssignmentDetails = () => {
   };
 
   if (deletionSuccess) {
-    return <Navigate to="/" replace />;
+    return <div>Deletion success</div>;
   }
 
   if (!assignment) {
@@ -148,9 +312,11 @@ export const AssignmentDetails = () => {
 
   return (
     <div className="assignment-details">
-      <h2>{assignment.title}</h2>
+      <h2>{assignment.name}</h2>
       <p>{assignment.description}</p>
+      {/*
       <p><strong>Deadline:</strong> {assignment.deadline}</p>
+      */}
 
       {role === 'teacher' && isCurating ? (
         <>
@@ -180,6 +346,7 @@ export const AssignmentDetails = () => {
                     rows="5"
                   />
                 </div>
+                {/*
                 <div className="form-group">
                   <label htmlFor="deadline">Deadline:</label>
                   <input
@@ -191,6 +358,7 @@ export const AssignmentDetails = () => {
                     required
                   />
                 </div>
+                */}
                 <div className="edit-course-actions">
                 <button className="save-button" type="save-button" onClick={handleSaveEdit}>Save</button>
                 <button className="cancel-button" type="cancel-button" onClick={handleCancelEdit}>Cancel</button>
@@ -207,8 +375,8 @@ export const AssignmentDetails = () => {
             <table>
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Student ID</th>
+                  <th>Student Name</th>
                   <th>File Name</th>
                   <th>Date</th>
                   <th>Action</th>
@@ -216,13 +384,13 @@ export const AssignmentDetails = () => {
               </thead>
               <tbody>
                 {submissions.map((submission) => (
-                  <tr key={submission.id}>
-                    <td>{submission.id}</td>
+                  <tr key={`${submission.studentId}-${submission.fileName}-${submission.submissionDate}`}>
                     <td>{submission.studentId}</td>
+                    <td>{submission.studentName}</td>
                     <td>{submission.fileName}</td>
-                    <td>{submission.date}</td>
+                    <td>{formatDate(submission.submissionDate)}</td>
                     <td>
-                      <button onClick={() => handleDownload(submission.fileName)}>Download</button>
+                      <button onClick={() => handleDownload(submission.path, submission.fileName)}>Download</button>
                     </td>
                   </tr>
                 ))}
@@ -254,7 +422,7 @@ export const AssignmentDetails = () => {
             {assignmentStatus === 'Submitted' && (
               <div className="download-section">
                 <h3>Download Submitted Files</h3>
-                <button onClick={handleDownload}>Download</button>
+                <button onClick={() => handleDownload(topSubmission.path, topSubmission.fileName)}>Download</button>
               </div>
             )}
           </>

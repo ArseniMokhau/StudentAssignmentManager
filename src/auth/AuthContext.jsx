@@ -4,33 +4,41 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [token, setToken] = useState(null);
   const [role, setRole] = useState(null);
+  const [uid, setUid] = useState(null);
 
   useEffect(() => {
-    // On component mount, check if there's a token in localStorage
-    const token = localStorage.getItem('token');
+    setToken(localStorage.getItem('token'));
     if (token) {
-      // If token exists, set isLoggedIn to true and retrieve role
       setIsLoggedIn(true);
-      // Fetch role from backend or set it based on your implementation
-      setRole('teacher'); // Placeholder, replace with actual logic to fetch role
+      setRole(localStorage.getItem('role'));
+      setUid(localStorage.getItem('uid'));
     }
-  }, []);
+  }, [token]);
 
-  const login = (token, userRole) => {
+  const login = (token, userRole, userId) => {
     localStorage.setItem('token', token);
+    localStorage.setItem('role', userRole);
+    localStorage.setItem('uid', userId);
+    setToken(token);
     setRole(userRole);
+    setUid(userId);
     setIsLoggedIn(true);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('uid');
+    setToken(null);
     setRole(null);
+    setUid(null);
     setIsLoggedIn(false);
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout, role }}>
+    <AuthContext.Provider value={{ isLoggedIn, login, logout, token, role, uid }}>
       {children}
     </AuthContext.Provider>
   );

@@ -30,6 +30,21 @@
   background-color: #f2f2f2;
 }
 
+.submissions-table button,
+.download-section button {
+  width:fit-content;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
 .assignment-status {
   margin-top: 20px;
 }
@@ -85,15 +100,12 @@
 
 .edit-course-actions {
   margin-top: 20px;
+  display: flex;
+  flex-direction: row;
 }
 
 .edit-course-actions button {
   margin-right: 10px;
-}
-
-.save-button,
-.cancel-button,
-.delete-button {
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;

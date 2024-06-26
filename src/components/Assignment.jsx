@@ -7,7 +7,9 @@ export const Assignment = ({ assignment }) => {
     <div className="assignment">
       <h4>{assignment.title}</h4>
       <p>{assignment.description}</p>
+      {/* 
       <p><strong>Deadline:</strong> {assignment.deadline}</p>
+      */}
       <Link to={`/assignment/${assignment.id}`}>View Details</Link>
     </div>
   );

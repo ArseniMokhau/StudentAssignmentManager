@@ -1,31 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Course } from './Course';
 import './GuestHomePage.css';
 
-const placeholderCourses = [
-  { id: 1, name: 'Course 1' },
-  { id: 2, name: 'Course 2' },
-  { id: 3, name: 'Course 3' },
-  { id: 4, name: 'Course 4' },
-  { id: 5, name: 'Course 5' },
-  { id: 6, name: 'Course 6' },
-  { id: 7, name: 'Course 7' },
-  { id: 8, name: 'Course 8' },
-  { id: 9, name: 'Course 9' },
-  { id: 10, name: 'Course 10' },
-  { id: 11, name: 'Course 11' },
-  { id: 12, name: 'Course 12' },
-];
-
 const COURSES_PER_PAGE = 5;
+
 
 export const GuestHomePage = () => {
   const [currentPage, setCurrentPage] = useState(1);
-
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   const startIndex = (currentPage - 1) * COURSES_PER_PAGE;
-  const currentCourses = placeholderCourses.slice(startIndex, startIndex + COURSES_PER_PAGE);
+  const currentCourses = courses.slice(startIndex, startIndex + COURSES_PER_PAGE);
+  const totalPages = Math.ceil(courses.length / COURSES_PER_PAGE);
 
-  const totalPages = Math.ceil(placeholderCourses.length / COURSES_PER_PAGE);
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+
+  const fetchCourses = async () => {
+    try {
+      const response = await fetch('/auth/all-repository', {
+        method: 'GET',
+        headers: {
+          'accept': 'text/plain',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch courses');
+      }
+
+      const data = await response.json();
+      const formattedCourses = data.map(course => ({
+        id: course.repositoryId,
+        name: course.repositoryName,
+      }));
+      setCourses(formattedCourses);
+      setLoading(false);
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="home-page">

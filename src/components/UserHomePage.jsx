@@ -1,47 +1,91 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Course } from './Course';
 import { AuthContext } from '../auth/AuthContext';
 import './UserHomePage.css';
 
-const placeholderCourses = [
-  { id: 1, name: 'Course 1' },
-  { id: 2, name: 'Course 2' },
-  { id: 3, name: 'Course 3' },
-  { id: 4, name: 'Course 4' },
-  { id: 5, name: 'Course 5' },
-  { id: 6, name: 'Course 6' },
-  { id: 7, name: 'Course 7' },
-  { id: 8, name: 'Course 8' },
-  { id: 9, name: 'Course 9' },
-  { id: 10, name: 'Course 10' },
-  { id: 11, name: 'Course 11' },
-  { id: 12, name: 'Course 12' },
-];
-
-const placeholderUserCourses = [
-  { id: 1, name: 'User Course 1' },
-  { id: 2, name: 'User Course 2' },
-];
-
 const COURSES_PER_PAGE = 5;
 
 export const UserHomePage = () => {
-  const { role } = useContext(AuthContext);
-  const [courses, setCourses] = useState(placeholderCourses);
-  const [userCourses, setUserCourses] = useState(placeholderUserCourses);
+  const { role, uid } = useContext(AuthContext);
+  const [courses, setCourses] = useState([]);
+  const [userCourses, setUserCourses] = useState([]);
   const [newCourseName, setNewCourseName] = useState('');
+  const [newCourseDescription, setNewCourseDescription] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const startIndex = (currentPage - 1) * COURSES_PER_PAGE;
   const currentCourses = courses.slice(startIndex, startIndex + COURSES_PER_PAGE);
   const totalPages = Math.ceil(courses.length / COURSES_PER_PAGE);
 
-  const handleCreateCourse = (e) => {
-    e.preventDefault();
-    const newCourse = { id: courses.length + 1, name: newCourseName };
-    setCourses([...courses, newCourse]);
-    setNewCourseName('');
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    try {
+      const response = await fetch('/auth/all-repository', {
+        method: 'GET',
+        headers: {
+          'accept': 'text/plain',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch courses');
+      }
+
+      const data = await response.json();
+      const formattedCourses = data.map(course => ({
+        id: course.repositoryId,
+        name: course.repositoryName,
+      }));
+      setCourses(formattedCourses);
+      setLoading(false);
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
+    }
   };
+
+  const handleCreateCourse = async (event) => {
+    event.preventDefault();
+    
+    try {
+      const response = await fetch(`/auth/create-repository?repositoryName=${newCourseName}&description=${newCourseDescription}&teacherId=${uid}`, {
+        method: 'POST',
+        headers: {
+          'accept': '*/*',
+        },
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.text();
+      console.log('Course created successfully', data);
+
+      // Re-fetch the courses after creating a new one
+      fetchCourses();
+    } catch (error) {
+      console.error('Course creation failed:', error.message);
+      setError(`Course creation failed: ${error.message}`);
+    }
+
+    setNewCourseName('');
+    setNewCourseDescription('');
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="home-page">
@@ -77,6 +121,13 @@ export const UserHomePage = () => {
               value={newCourseName}
               onChange={(e) => setNewCourseName(e.target.value)}
               placeholder="Course Name"
+              required
+            />
+            <input
+              type="text"
+              value={newCourseDescription}
+              onChange={(e) => setNewCourseDescription(e.target.value)}
+              placeholder="Course Description"
               required
             />
             <button type="submit">Create Course</button>

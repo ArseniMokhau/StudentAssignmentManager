@@ -2,46 +2,89 @@ import React, { useState, useEffect, useContext } from 'react';
 import './Requests.css';
 import { AuthContext } from '../auth/AuthContext';
 
-// Placeholder data for student requests
-const studentRequests = [
-  { id: 1, type: 'Enrollment', course: 'Course A', status: 'Pending' },
-  { id: 2, type: 'Curation', course: 'Course B', status: 'Pending' },
-];
-
-// Placeholder data for teacher requests (self and others)
-const teacherRequests = [
-  { id: 1, type: 'Enrollment', course: 'Course C', status: 'Pending', userId: 101 },
-  { id: 2, type: 'Curation', course: 'Course D', status: 'Pending', userId: 102 },
-  { id: 3, type: 'Enrollment', course: 'Course E', status: 'Pending', userId: 103 },
-];
-
 export const Requests = () => {
-  const { role } = useContext(AuthContext);
+  const { role, uid } = useContext(AuthContext);
   const [requests, setRequests] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchRequests();
-  }, []);
+    if (uid) {
+      fetchRequests();
+    }
+  }, [uid]);
 
-  const fetchRequests = () => {
-    if (role === 'student') {
-      // Simulate fetching student requests
-      setRequests(studentRequests);
-    } else if (role === 'teacher') {
-      // Simulate fetching teacher requests (self and others)
-      setRequests(teacherRequests);
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('Fetching requests...');
+      const response = await fetch(`/auth/get-active-access-requests?teacherId=${uid}`, {
+        method: 'GET',
+        headers: {
+          'accept': '*/*',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch requests, status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Fetched data:', data);
+
+      const parsedRequests = data.map(request => ({
+        id: request.repositoryAccessRequestId,
+        type: request.role,
+        course: request.courseId,
+        username: request.username,
+        requestTime: request.requestTime,
+      }));
+
+      setRequests(parsedRequests);
+    } catch (error) {
+      console.error('Error fetching requests:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleConfirm = (requestId) => {
-    // Placeholder function to handle confirmation
-    console.log(`Request ${requestId} confirmed.`);
+    approveRequest(requestId);
   };
 
   const handleDeny = (requestId) => {
-    // Placeholder function to handle denial
     console.log(`Request ${requestId} denied.`);
   };
+
+  const approveRequest = async (requestId) => {
+    try {
+      console.log('Approving request...', requestId);
+      const response = await fetch(`/auth/approve-access-student-course?requestId=${requestId}`, {
+        method: 'POST',
+        headers: {
+          'accept': '*/*',
+        },
+        body: '', // Empty body for POST request
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to approve request, status: ${response.status}`);
+      }
+
+      const data = await response.text();
+      console.log(data); // Log success message
+      fetchRequests(); // Re-fetch requests after approval
+    } catch (error) {
+      console.error('Error approving request:', error);
+      setError(error.message);
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="requests-container">
@@ -49,19 +92,20 @@ export const Requests = () => {
       <table>
         <thead>
           <tr>
-            <th>ID</th>
             <th>Type</th>
             <th>Course</th>
+            <th>Username</th>
+            <th>Request Time</th>
             {role === 'teacher' && <th>Actions</th>}
           </tr>
         </thead>
         <tbody>
           {requests.map(request => (
             <tr key={request.id}>
-              <td>{request.id}</td>
               <td>{request.type}</td>
               <td>{request.course}</td>
-              {/*Check if the id of request user matches the id of logged in user*/}
+              <td>{request.username}</td>
+              <td>{new Date(request.requestTime).toLocaleString()}</td>
               {role === 'teacher' && (
                 <td>
                   <button onClick={() => handleConfirm(request.id)}>Confirm</button>
