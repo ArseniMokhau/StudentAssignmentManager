@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WAP_Project")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5ff5f5328d7b962f56ab2c5a5305abcda07b85bc")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ea8599f583cd4cd222e5c8c499385d280ba97206")]
 [assembly: System.Reflection.AssemblyProductAttribute("WAP_Project")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WAP_Project")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -457,18 +457,22 @@ namespace WAP_Project.Controllers
         }
 
         [HttpGet("teacher-get all sended assignments")]
-        public IActionResult GetAssignmentFiles([FromQuery] string assignmentId, [FromQuery] string teacherToken)
+        public IActionResult GetAssignmentFiles([FromQuery] string assignmentId, [FromQuery] string teacherId)
         {
             try
 
             {
-                // Find the teacher by token
-                var teacherTokenObj = _context.UserTokens.FirstOrDefault(t => t.Token == teacherToken);
-                if (teacherTokenObj == null) return Unauthorized("Invalid token");
+               /*  // Find the teacher by token
+                 var teacherTokenObj = _context.UserTokens.FirstOrDefault(t => t.Token == teacherToken);
+                 if (teacherTokenObj == null) return Unauthorized("Invalid token");
 
-                // Find the teacher by teacherId
-                var teacher = _context.Teachers.FirstOrDefault(t => t.TeacherId == teacherTokenObj.UserId);
-                if (teacher == null)  return Unauthorized("Teacher not found");
+                 // Find the teacher by teacherId
+                 var teacher = _context.Teachers.FirstOrDefault(t => t.TeacherId == teacherTokenObj.UserId);
+                 if (teacher == null)  return Unauthorized("Teacher not found");*/
+
+              // Find the teacher by teacherId
+                var teacher = _context.Teachers.FirstOrDefault(t => t.TeacherId == teacherId);
+                if (teacher == null) return Unauthorized("Teacher not found");
 
                 // Optionally, check if the teacher has the correct role
                 if (teacher.Role != "teacher" && teacher.Role != "Teacher") return Unauthorized("Teacher does not have permission to access this endpoint");
@@ -510,6 +514,7 @@ namespace WAP_Project.Controllers
                                 StudentId = studentId,
                                 StudentName = studentName,
                                 FileName = fileName,
+                                Path = uploadsDirectory,
                                 SubmissionDate = studentAssignment.SubmissionDate
                             });
                         }
@@ -634,7 +639,7 @@ namespace WAP_Project.Controllers
               }
           }*/
 
-        [HttpGet("download-assignment-files")]
+  /*      [HttpGet("download-assignment-files")]
         public IActionResult DownloadAssignmentFiles([FromQuery] string assignmentId, [FromQuery] string teacherId)
         {
             try
@@ -660,6 +665,7 @@ namespace WAP_Project.Controllers
                 {
                     return NotFound("No student assignments found for this assignment");
                 }
+
 
                 // Prepare a list to store memory streams of all files
                 var fileStreams = new List<MemoryStream>();
@@ -717,7 +723,7 @@ namespace WAP_Project.Controllers
                 Console.WriteLine($"Error downloading assignment files: {ex.Message}");
                 return StatusCode(500, "An error occurred while downloading assignment files");
             }
-        }
+        }*/
 
 
         /* [HttpGet("get all assignments from student repo ")]
